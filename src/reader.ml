@@ -72,12 +72,10 @@ let rec read_form tokens =
         read_quote "deref" xs
 
       | "^" ->
-        let meta_form, remain_tokens = read_form xs in
-        let value_form, remain_tokens = read_form remain_tokens in
-        ( Types.list [Types.symbol "with-meta"; value_form; meta_form]
-        , remain_tokens)
+        read_with_meta xs
 
-      | _ -> (read_atom x, xs)
+      | _ ->
+        (read_atom x, xs)
     end
 
 and read_sequnence eol form_list tokens =
@@ -92,13 +90,15 @@ and read_sequnence eol form_list tokens =
     let form, remain_tokens = read_form tokens in
     read_sequnence eol (form_list @ [form]) remain_tokens
 
-and read_map _rdr = T.nil
-
 and read_quote sym tokens =
   let form, tks = read_form tokens in
   (T.list [T.symbol sym; form], tks)
 
-and read_with_meta _rdr = T.nil
+and read_with_meta tokens =
+  let meta_form, remain_tokens = read_form tokens in
+  let value_form, remain_tokens = read_form remain_tokens in
+  ( Types.list [Types.symbol "with-meta"; value_form; meta_form]
+  , remain_tokens)
 
 and read_atom token =
   try
