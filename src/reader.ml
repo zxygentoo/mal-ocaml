@@ -69,13 +69,13 @@ let rec read_form tokens =
         read_quote "splice-unquote" xs
 
       | "@"  ->
-        read_quote "deref" xs
+        read_atom xs
 
       | "^" ->
         read_with_meta xs
 
       | _ ->
-        (read_atom x, xs)
+        (read_salar x, xs)
     end
 
 and read_sequnence eol forms tokens =
@@ -94,13 +94,16 @@ and read_quote sym tokens =
   let form, tks = read_form tokens in
   (T.list [T.symbol sym; form], tks)
 
+and read_atom tokens =
+  read_quote "deref" tokens
+
 and read_with_meta tokens =
   let meta, tokens_left_meta = read_form tokens in
   let value, tokens_left = read_form tokens_left_meta in
   ( Types.list [Types.symbol "with-meta"; value; meta]
   , tokens_left)
 
-and read_atom token =
+and read_salar token =
   try
     T.int (int_of_string token)
   with
