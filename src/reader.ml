@@ -40,18 +40,18 @@ let rec read_form tokens =
   | x :: xs -> begin
       match x with
       | "(" ->
-        let form_list, remain_tokens = read_sequnence ")" [] xs in
-        (T.list form_list, remain_tokens)
+        let forms, tokens_left = read_sequnence ")" [] xs in
+        (T.list forms, tokens_left)
 
       | "[" ->
-        let form_list, remain_tokens = read_sequnence "]" [] xs in
-        (T.vector form_list, remain_tokens)
+        let forms, tokens_left = read_sequnence "]" [] xs in
+        (T.vector forms, tokens_left)
 
       | "{" ->
-        let form_list, remain_tokens = read_sequnence "}" [] xs in
+        let forms, tokens_left = read_sequnence "}" [] xs in
         begin
           try
-            (T.map_of_list form_list, remain_tokens)
+            (T.map_of_list forms, tokens_left)
           with Invalid_argument s ->
             raise (ReaderErr s)
         end
@@ -78,27 +78,27 @@ let rec read_form tokens =
         (read_atom x, xs)
     end
 
-and read_sequnence eol form_list tokens =
+and read_sequnence eol forms tokens =
   match tokens with
   | [] ->
     raise (ReaderErr "Unexpected end of string!")
 
   | x :: xs when x = eol ->
-    (form_list, xs)
+    (forms, xs)
 
   | _ ->
-    let form, remain_tokens = read_form tokens in
-    read_sequnence eol (form_list @ [form]) remain_tokens
+    let form, tokens_left = read_form tokens in
+    read_sequnence eol (forms @ [form]) tokens_left
 
 and read_quote sym tokens =
   let form, tks = read_form tokens in
   (T.list [T.symbol sym; form], tks)
 
 and read_with_meta tokens =
-  let meta_form, remain_tokens = read_form tokens in
-  let value_form, remain_tokens = read_form remain_tokens in
-  ( Types.list [Types.symbol "with-meta"; value_form; meta_form]
-  , remain_tokens)
+  let meta, tokens_left_meta = read_form tokens in
+  let value, tokens_left = read_form tokens_left_meta in
+  ( Types.list [Types.symbol "with-meta"; value; meta]
+  , tokens_left)
 
 and read_atom token =
   try
