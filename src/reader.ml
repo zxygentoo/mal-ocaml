@@ -91,8 +91,8 @@ and read_sequnence eol forms tokens =
     read_sequnence eol (forms @ [form]) tokens_left
 
 and read_quote sym tokens =
-  let form, tks = read_form tokens in
-  (T.list [T.symbol sym; form], tks)
+  let form, tokens_left = read_form tokens in
+  (T.list [T.symbol sym; form], tokens_left)
 
 and read_atom tokens =
   read_quote "deref" tokens
