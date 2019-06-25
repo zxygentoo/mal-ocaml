@@ -1,0 +1,5 @@
+(executable
+    ; (name step0_repl)
+    (libraries str)
+    (name step1_read_print)
+)
