@@ -30,7 +30,8 @@ let rec eval env ast =
 
     | TT.Map(xs, _) ->
       T.map(
-        T.MalMap.fold (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
+        T.MalMap.fold
+          (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
           xs
           T.MalMap.empty
       )
