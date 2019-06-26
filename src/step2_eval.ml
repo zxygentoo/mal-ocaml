@@ -64,7 +64,7 @@ let rep str =
     ) in
 
   let repl_env =
-    let env = E.init () in
+    let env = E.root () in
     E.set "+" (arith_fn ( + )) env ;
     E.set "-" (arith_fn ( - )) env ;
     E.set "*" (arith_fn ( * )) env ;

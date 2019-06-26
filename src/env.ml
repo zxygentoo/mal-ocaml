@@ -9,13 +9,13 @@ type env = { current : T.maltype M.t ref
 exception EnvErr of string
 
 
-let env outer =
+let create outer =
   { current = ref M.empty
   ; outer = outer }
 
 
-let init () =
-  env None
+let root () =
+  create None
 
 
 let set k v env =
