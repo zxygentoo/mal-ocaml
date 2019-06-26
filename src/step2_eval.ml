@@ -93,5 +93,6 @@ let main =
       | EvalErr s ->
         print_err s
     done
-  with End_of_file ->
+  with
+  | End_of_file ->
     ()
