@@ -40,21 +40,13 @@ let rec read_form tokens =
   | x :: xs -> begin
       match x with
       | "(" ->
-        let forms, tokens_left = read_container ")" [] xs in
-        (T.list forms, tokens_left)
+        read_list xs
 
       | "[" ->
-        let forms, tokens_left = read_container "]" [] xs in
-        (T.vector forms, tokens_left)
+        read_vector xs
 
       | "{" ->
-        let forms, tokens_left = read_container "}" [] xs in
-        begin
-          try
-            (T.map_of_list forms, tokens_left)
-          with Invalid_argument s ->
-            raise (ReaderErr s)
-        end
+        read_map xs
 
       | "'"  ->
         read_quote "quote" xs
@@ -78,6 +70,23 @@ let rec read_form tokens =
         (read_salar x, xs)
     end
 
+and read_list tokens =
+  let forms, tokens_left = read_container ")" [] tokens in
+  (T.list forms, tokens_left)
+
+and read_vector tokens =
+  let forms, tokens_left = read_container "]" [] tokens in
+  (T.vector forms, tokens_left)
+
+and read_map tokens =
+  let forms, tokens_left = read_container "}" [] xs in
+  begin
+    try
+      (T.map_of_list forms, tokens_left)
+    with Invalid_argument s ->
+      raise (ReaderErr s)
+  end
+
 and read_container eol forms tokens =
   match tokens with
   | [] ->
@@ -100,8 +109,7 @@ and read_atom tokens =
 and read_with_meta tokens =
   let meta, tokens_left_meta = read_form tokens in
   let value, tokens_left = read_form tokens_left_meta in
-  ( Types.list [Types.symbol "with-meta"; value; meta]
-  , tokens_left)
+  (Types.list [Types.symbol "with-meta"; value; meta], tokens_left)
 
 and read_salar token =
   try
