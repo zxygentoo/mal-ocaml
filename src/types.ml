@@ -67,7 +67,7 @@ let map_of_list x =
       aux (MalMap.add k v acc) xs
 
     | _ :: [] ->
-      raise (Invalid_argument "Map must contain even elements.")
+      raise (Invalid_argument "Map must contain even number of elements.")
   in
   aux MalMap.empty x
 

@@ -22,7 +22,7 @@ let tokenize s =
   let to_str rs =
     List.map
       (function | Str.Delim x -> x
-                | Str.Text _ -> raise (ReaderErr "Tokenization error!")) 
+                | Str.Text _ -> raise (ReaderErr "Tokenization error."))
       rs in
 
   let filter_empty_str ss =
@@ -90,7 +90,7 @@ and read_map tokens =
 and read_container eol forms tokens =
   match tokens with
   | [] ->
-    raise (ReaderErr "Unexpected end of string!")
+    raise (ReaderErr "Unbanlanced input.")
 
   | x :: xs when x = eol ->
     (forms, xs)
@@ -130,11 +130,11 @@ and read_salar token =
           let len = String.length token in
           match List.init len (String.get token) with
           | [] ->
-            raise (ReaderErr "Unexpected end of string!")
+            raise (ReaderErr "Unexpected end of input.")
 
           | x :: _ when x = '"' ->
             if String.get token (len - 1) <> '"'
-            then raise (ReaderErr "Unexpected end of string!")
+            then raise (ReaderErr "Unexpected end of string literal.")
             else T.string (String.sub token 1 (len - 2))
 
           | x :: _ when x = ':' ->

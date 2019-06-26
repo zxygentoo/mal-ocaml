@@ -42,7 +42,7 @@ let rec string_of_maltype exp =
     "}"
 
   | T.Fn(_, _) ->
-    "#<function>"
+    "#[function]"
 
   | T.Atom(x) ->
     "(atom " ^ (string_of_maltype !x) ^ ")"
