@@ -75,6 +75,9 @@ let rep str =
 
 
 let main =
+  let print_err s =
+    print_endline ("Error: " ^ s)
+  in
   try
     while true do
       print_string "user> " ;
@@ -85,9 +88,9 @@ let main =
         ()
 
       | Reader.ReaderErr err ->
-        print_endline err
+        print_err err
 
       | EvalErr s ->
-        print_endline s
+        print_err s
     done
   with End_of_file -> ()
