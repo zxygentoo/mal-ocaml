@@ -24,8 +24,13 @@ let set k v env =
 
 let rec get k env =
   match M.find_opt k !(env.current) with
-  | Some(_) as v -> v
+  | Some(_) as v ->
+    v
+
   | None -> begin match env.outer with
-      | None -> None
-      | Some(outer) -> get k outer
+      | None ->
+        None
+
+      | Some(outer) ->
+        get k outer
     end
