@@ -79,7 +79,7 @@ and read_vector tokens =
   (T.vector forms, tokens_left)
 
 and read_map tokens =
-  let forms, tokens_left = read_container "}" [] xs in
+  let forms, tokens_left = read_container "}" [] tokens in
   begin
     try
       (T.map_of_list forms, tokens_left)
