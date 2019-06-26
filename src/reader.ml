@@ -40,15 +40,15 @@ let rec read_form tokens =
   | x :: xs -> begin
       match x with
       | "(" ->
-        let forms, tokens_left = read_sequnence ")" [] xs in
+        let forms, tokens_left = read_container ")" [] xs in
         (T.list forms, tokens_left)
 
       | "[" ->
-        let forms, tokens_left = read_sequnence "]" [] xs in
+        let forms, tokens_left = read_container "]" [] xs in
         (T.vector forms, tokens_left)
 
       | "{" ->
-        let forms, tokens_left = read_sequnence "}" [] xs in
+        let forms, tokens_left = read_container "}" [] xs in
         begin
           try
             (T.map_of_list forms, tokens_left)
@@ -78,7 +78,7 @@ let rec read_form tokens =
         (read_salar x, xs)
     end
 
-and read_sequnence eol forms tokens =
+and read_container eol forms tokens =
   match tokens with
   | [] ->
     raise (ReaderErr "Unexpected end of string!")
@@ -88,7 +88,7 @@ and read_sequnence eol forms tokens =
 
   | _ ->
     let form, tokens_left = read_form tokens in
-    read_sequnence eol (forms @ [form]) tokens_left
+    read_container eol (forms @ [form]) tokens_left
 
 and read_quote sym tokens =
   let form, tokens_left = read_form tokens in
