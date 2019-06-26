@@ -74,10 +74,6 @@ let rep str =
   str |> read |> eval repl_env |> print
 
 
-let eval_ast _env _ast =
-  ()
-
-
 let main =
   try
     while true do
