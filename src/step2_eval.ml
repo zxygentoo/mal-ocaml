@@ -11,41 +11,40 @@ let read str =
 
 
 let rec eval env ast =
-  let eval_ast env ast =
-    match ast with
-    | TT.Symbol(x, _) ->
-      begin match E.get x env with
-        | Some(v) ->
-          v
-
-        | None ->
-          raise (EvalErr ("can't find symbol '" ^ x ^ "'."))
-      end
-
-    | TT.List(xs, _) ->
-      T.list(List.map (eval env) xs)
-
-    | TT.Vector(xs, _) ->
-      T.vector(List.map (eval env) xs)
-
-    | TT.Map(xs, _) ->
-      T.map(
-        T.MalMap.fold
-          (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
-          xs
-          T.MalMap.empty
-      )
-
-    | _ ->
-      ast
-  in
-
   match eval_ast env ast with
   | TT.List(TT.Fn(f, _) :: args, _) ->
     f args
 
   | _ as result ->
     result
+
+and eval_ast env ast =
+  match ast with
+  | TT.Symbol(x, _) ->
+    begin match E.get x env with
+      | Some(v) ->
+        v
+
+      | None ->
+        raise (EvalErr ("can't find symbol '" ^ x ^ "'."))
+    end
+
+  | TT.List(xs, _) ->
+    T.list(List.map (eval env) xs)
+
+  | TT.Vector(xs, _) ->
+    T.vector(List.map (eval env) xs)
+
+  | TT.Map(xs, _) ->
+    T.map(
+      T.MalMap.fold
+        (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
+        xs
+        T.MalMap.empty
+    )
+
+  | _ ->
+    ast
 
 
 let print exp =
