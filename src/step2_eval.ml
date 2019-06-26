@@ -53,11 +53,11 @@ let print exp =
 
 
 let rep str =
-  let arith_fn op =
+  let arith_fn f =
     T.fn(
       function
       | [TT.Int(a); TT.Int(b)] ->
-        TT.Int(op a b)
+        TT.Int(f a b)
 
       | _ ->
         raise (EvalErr "Arithmetic functions require two int arguments.")
