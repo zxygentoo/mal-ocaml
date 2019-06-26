@@ -1,6 +1,6 @@
 module T = Types.Types
 
-let rec string_of_exp exp =
+let rec string_of_maltype exp =
   match exp with
   | T.Nil ->
     "nil"
@@ -35,24 +35,24 @@ let rec string_of_exp exp =
        (fun k v s ->
           s ^
           (if s = "" then "" else ", ") ^
-          (string_of_exp k) ^ " " ^ (string_of_exp v))
+          (string_of_maltype k) ^ " " ^ (string_of_maltype v))
        xs 
        ""
     ) ^
     "}"
 
   | T.Fn(_, _) ->
-    "#[fn] not yet printable ..."
+    "#<function>"
 
-  | T.Atom(_) ->
-    "#[atom] not yet printable ..."
+  | T.Atom(x) ->
+    "(atom " ^ (string_of_maltype !x) ^ ")"
 
 and string_of_list_or_vector xs sol eol=
   sol ^
-  (String.concat " " (List.map (fun s -> string_of_exp s) xs)) ^
+  (String.concat " " (List.map (fun s -> string_of_maltype s) xs)) ^
   eol
 
 (* api *)
 
 let print_str exp =
-  exp |> string_of_exp |> print_endline
+  exp |> string_of_maltype |> print_endline
