@@ -18,8 +18,8 @@ and MalValue
   : sig
     type t = Types.t
     val compare : t -> t -> int
-  end
-= struct
+  end = 
+struct
   type t = Types.t
   let compare = Pervasives.compare
 end
@@ -28,34 +28,45 @@ and MalMap
   : Map.S with type key = MalValue.t
   = Map.Make(MalValue)
 
+
 type maltype = MalValue.t
 
+
 exception MalExn of Types.t
+
 
 let nil = Types.Nil
 let maltrue = Types.Bool true
 let malfalse = Types.Bool false
 
+
 let int x =
   Types.Int x
+
 
 let string x =
   Types.String x
 
+
 let keyword x =
   Types.Keyword x
+
 
 let symbol x = 
   Types.Symbol(x, nil)
 
+
 let list x = 
   Types.List(x, nil)
+
 
 let vector x = 
   Types.Vector(x, nil)
 
+
 let map x =
   Types.Map(x, nil)
+
 
 let map_of_list x =
   let rec aux acc x =
@@ -71,8 +82,10 @@ let map_of_list x =
   in
   aux MalMap.empty x
 
+
 let fn x = 
   Types.Fn(x, nil)
+
 
 let is_falsey = function
   | Types.Nil | Types.Bool(true) -> true
