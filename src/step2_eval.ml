@@ -29,7 +29,11 @@ let rec eval env ast =
       T.vector(List.map (eval env) xs)
 
     | TT.Map(xs, _) ->
-      T.map(T.MalMap.fold (fun k v m -> T.MalMap.add k v m) xs T.MalMap.empty)
+      T.map(
+        T.MalMap.fold (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
+          xs
+          T.MalMap.empty
+      )
 
     | _ ->
       ast
