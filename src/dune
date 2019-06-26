@@ -1,5 +1,6 @@
 (executable
-    ; (name step0_repl)
     (libraries str)
-    (name step1_read_print)
+    ; (name step0_repl)
+    ; (name step1_read_print)
+    (name step2_eval)
 )
