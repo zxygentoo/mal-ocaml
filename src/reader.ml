@@ -3,6 +3,17 @@ module T = Types
 exception ReaderErr of string
 exception Nothing
 
+(* helpers *)
+
+let gsub re f str =
+  String.concat
+    "" (List.map
+          (function
+            | Str.Delim x -> f x
+            | Str.Text x -> x)
+          (Str.full_split re str))
+
+
 (* tokenization *)
 
 let token_re =
@@ -133,9 +144,14 @@ and read_salar token =
             raise (ReaderErr "Unexpected end of input.")
 
           | x :: _ when x = '"' ->
-            if String.get token (len - 1) <> '"'
-            then raise (ReaderErr "Unexpected end of string literal.")
-            else T.string (String.sub token 1 (len - 2))
+            if token.[len - 1] = '"'
+            then T.string (gsub
+                             (Str.regexp "\\\\.")
+                             (function
+                               | "\\n" -> "\n"
+                               | x -> String.sub x 1 1)
+                             (String.sub token 1 ((String.length token) - 2)))
+            else raise (ReaderErr "Unexpected end of string literal.")
 
           | x :: _ when x = ':' ->
             T.keyword (String.sub token 1 (len - 1))
@@ -144,6 +160,7 @@ and read_salar token =
             T.symbol token
         end
     end
+
 
 (* api *)
 

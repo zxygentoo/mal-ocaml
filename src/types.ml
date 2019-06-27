@@ -87,6 +87,34 @@ let fn x =
   Types.Fn(x, nil)
 
 
-let is_falsey = function
-  | Types.Nil | Types.Bool(true) -> true
+let to_bool = function
+  | Types.Nil
+  | Types.Bool(false) -> false
+  | _ -> true
+
+
+let is_list = function
+  | Types.List(_, _) -> true
   | _ -> false
+
+
+let rec mal_equal a b =
+  match a, b with
+  | Types.List(x, _), Types.List(y, _)
+  | Types.List(x, _), Types.Vector(y, _)
+  | Types.Vector(x, _), Types.Vector(y, _)
+  | Types.Vector(x, _), Types.List(y, _) ->
+    mal_sequnce_equal x y
+
+  | Types.Map(x, _), Types.Map(y, _) ->
+    mal_map_equal x y
+
+  | _ ->
+    a = b
+
+and mal_sequnce_equal a b =
+  List.length a = List.length b && List.for_all2 mal_equal a b
+
+and mal_map_equal a b =
+  let identical_to_b k v = MalMap.mem k b && mal_equal v (MalMap.find k b) in
+  MalMap.cardinal a = MalMap.cardinal b && MalMap.for_all identical_to_b a
