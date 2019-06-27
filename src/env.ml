@@ -22,15 +22,24 @@ let set k v env =
   env.current := M.add k v !(env.current)
 
 
-let rec get k env =
+let rec find k env =
   match M.find_opt k !(env.current) with
-  | Some(_) as v ->
-    v
+  | Some(_) ->
+    Some(env)
 
   | None -> begin match env.outer with
       | None ->
         None
 
       | Some(outer) ->
-        get k outer
+        (* Some(outer) *)
+        find k outer
     end
+
+let get k env =
+  match find k env with
+  | Some(env) ->
+    M.find_opt k !(env.current)
+
+  | None ->
+    None

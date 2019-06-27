@@ -2,5 +2,6 @@
     (libraries str)
     ; (name step0_repl)
     ; (name step1_read_print)
-    (name step2_eval)
+    ; (name step2_eval)
+    (name step3_env)
 )
