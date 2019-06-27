@@ -48,38 +48,35 @@ let rec read_form tokens =
   | [] ->
     raise Nothing
 
-  | x :: xs -> begin
-      match x with
-      | "(" ->
-        read_list xs
+  | "(" :: xs ->
+    read_list xs
 
-      | "[" ->
-        read_vector xs
+  | "[" :: xs ->
+    read_vector xs
 
-      | "{" ->
-        read_map xs
+  | "{" :: xs ->
+    read_map xs
 
-      | "'"  ->
-        read_quote "quote" xs
+  | "'"  :: xs ->
+    read_quote "quote" xs
 
-      | "`"  ->
-        read_quote "quasiquote" xs
+  | "`"  :: xs ->
+    read_quote "quasiquote" xs
 
-      | "~"  ->
-        read_quote "unquote" xs
+  | "~"  :: xs ->
+    read_quote "unquote" xs
 
-      | "~@" ->
-        read_quote "splice-unquote" xs
+  | "~@" :: xs ->
+    read_quote "splice-unquote" xs
 
-      | "@"  ->
-        read_atom xs
+  | "@"  :: xs ->
+    read_atom xs
 
-      | "^" ->
-        read_with_meta xs
+  | "^" :: xs ->
+    read_with_meta xs
 
-      | _ ->
-        (read_salar x, xs)
-    end
+  | x :: xs ->
+    (read_salar x, xs)
 
 and read_list tokens =
   let forms, tokens_left = read_container ")" [] tokens in

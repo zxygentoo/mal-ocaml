@@ -32,7 +32,6 @@ let rec find k env =
         None
 
       | Some(outer) ->
-        (* Some(outer) *)
         find k outer
     end
 
