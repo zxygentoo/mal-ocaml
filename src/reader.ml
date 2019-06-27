@@ -7,11 +7,12 @@ exception Nothing
 
 let gsub re f str =
   String.concat
-    "" (List.map
-          (function
-            | Str.Delim x -> f x
-            | Str.Text x -> x)
-          (Str.full_split re str))
+    ""
+    (List.map
+      (function
+        | Str.Delim x -> f x
+        | Str.Text x -> x)
+      (Str.full_split re str))
 
 
 (* tokenization *)
