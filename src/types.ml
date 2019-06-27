@@ -32,7 +32,7 @@ and MalMap
 type maltype = MalValue.t
 
 
-exception MalExn of Types.t
+exception Err of string
 
 
 let nil = Types.Nil
@@ -78,7 +78,7 @@ let map_of_list x =
       aux (MalMap.add k v acc) xs
 
     | _ :: [] ->
-      raise (Invalid_argument "Map must contain even number of elements.")
+      raise (Err "Map must contain even number of elements.")
   in
   aux MalMap.empty x
 
@@ -113,8 +113,12 @@ let rec mal_equal a b =
     a = b
 
 and mal_sequnce_equal a b =
-  List.length a = List.length b && List.for_all2 mal_equal a b
+  List.length a = List.length b
+  && List.for_all2 mal_equal a b
 
 and mal_map_equal a b =
-  let identical_to_b k v = MalMap.mem k b && mal_equal v (MalMap.find k b) in
-  MalMap.cardinal a = MalMap.cardinal b && MalMap.for_all identical_to_b a
+  let identical_to_b k v =
+    MalMap.mem k b && mal_equal v (MalMap.find k b)
+  in
+  MalMap.cardinal a = MalMap.cardinal b
+  && MalMap.for_all identical_to_b a

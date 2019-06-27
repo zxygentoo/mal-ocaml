@@ -94,7 +94,7 @@ and read_map tokens =
   begin
     try
       (T.map_of_list forms, tokens_left)
-    with Invalid_argument s ->
+    with T.Err s ->
       raise (Err s)
   end
 
