@@ -154,7 +154,7 @@ and read_salar token =
                              (function
                                | "\\n" -> "\n"
                                | x -> String.sub x 1 1)
-                             (String.sub token 1 ((String.length token) - 2)))
+                             (String.sub token 1 (len - 2)))
             else raise (Err "Unexpected end of string literal.")
 
           | x :: _ when x = ':' ->
