@@ -3,7 +3,7 @@ module T = Types
 module TT = Types.Types
 
 
-exception EvalErr of string
+exception Err of string
 
 
 let read str =
@@ -26,7 +26,7 @@ and eval_ast env ast =
         v
 
       | None ->
-        raise (EvalErr ("can't find symbol '" ^ x ^ "'."))
+        raise (Err ("can't find symbol '" ^ x ^ "'."))
     end
 
   | TT.List(xs, _) ->
@@ -59,7 +59,7 @@ let rep str =
         TT.Int(f a b)
 
       | _ ->
-        raise (EvalErr "Arithmetic functions require two int arguments.")
+        raise (Err "Arithmetic functions require two int arguments.")
     ) in
 
   let repl_env =
@@ -86,10 +86,10 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.ReaderErr err ->
+      | Reader.Err err ->
         print_err err
 
-      | EvalErr s ->
+      | Err s ->
         print_err s
     done
   with

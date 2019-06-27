@@ -1,6 +1,6 @@
 module T = Types
 
-exception ReaderErr of string
+exception Err of string
 exception Nothing
 
 (* helpers *)
@@ -33,7 +33,7 @@ let tokenize s =
   let to_str rs =
     List.map
       (function | Str.Delim x -> x
-                | Str.Text _ -> raise (ReaderErr "Tokenization error."))
+                | Str.Text _ -> raise (Err "Tokenization error."))
       rs in
 
   let filter_empty_str ss =
@@ -95,13 +95,13 @@ and read_map tokens =
     try
       (T.map_of_list forms, tokens_left)
     with Invalid_argument s ->
-      raise (ReaderErr s)
+      raise (Err s)
   end
 
 and read_container eol forms tokens =
   match tokens with
   | [] ->
-    raise (ReaderErr "Unbanlanced input.")
+    raise (Err "Unbanlanced input.")
 
   | x :: xs when x = eol ->
     (forms, xs)
@@ -141,7 +141,7 @@ and read_salar token =
           let len = String.length token in
           match List.init len (String.get token) with
           | [] ->
-            raise (ReaderErr "Unexpected end of input.")
+            raise (Err "Unexpected end of input.")
 
           | x :: _ when x = '"' ->
             if token.[len - 1] = '"'
@@ -151,7 +151,7 @@ and read_salar token =
                                | "\\n" -> "\n"
                                | x -> String.sub x 1 1)
                              (String.sub token 1 ((String.length token) - 2)))
-            else raise (ReaderErr "Unexpected end of string literal.")
+            else raise (Err "Unexpected end of string literal.")
 
           | x :: _ when x = ':' ->
             T.keyword (String.sub token 1 (len - 1))

@@ -3,7 +3,7 @@ module T = Types
 module TT = Types.Types
 
 
-exception EvalErr of string
+exception Err of string
 
 
 let read str =
@@ -43,7 +43,7 @@ and eval_def env = function
     value
 
   | _ ->
-    raise (EvalErr "Illegal 'def!' form.")
+    raise (Err "Illegal 'def!' form.")
 
 and eval_let env = function
   | [TT.List(bindings, _); body]
@@ -57,10 +57,10 @@ and eval_let env = function
         eval_let_bindings rest
 
       | _ :: _ :: _ ->
-        raise (EvalErr "'let*' binding first element should be a symbol.")
+        raise (Err "'let*' binding first element should be a symbol.")
 
       | _ :: [] ->
-        raise (EvalErr "'let*' bindings must have even number of elements.")
+        raise (Err "'let*' bindings must have even number of elements.")
 
       | [] ->
         ()
@@ -69,7 +69,7 @@ and eval_let env = function
     eval let_env body
 
   | _ ->
-    raise (EvalErr "Illegal 'let*' form.")
+    raise (Err "Illegal 'let*' form.")
 
 and eval_do env = function
   | [] ->
@@ -94,7 +94,7 @@ and eval_if env = function
     else (eval env else_expr)
 
   | _ ->
-    raise (EvalErr "Illegal 'if' form.")
+    raise (Err "Illegal 'if' form.")
 
 and eval_fn env = function
   | [TT.List(arg_names, _); body]
@@ -116,13 +116,13 @@ and eval_fn env = function
             ()
 
           | _ ->
-            raise (EvalErr "Bad parameters count in 'fn*'.")
+            raise (Err "Bad parameters count in 'fn*'.")
         in
         bind_args arg_names args ;
         eval fn_env body)
 
   | _ ->
-    raise (EvalErr "Illegal 'fn*' from.")
+    raise (Err "Illegal 'fn*' from.")
 
 and apply_function env ast =
   match eval_ast env ast with
@@ -130,7 +130,7 @@ and apply_function env ast =
     f args
 
   | _ ->
-    raise (EvalErr "Can't invoke non-function.")
+    raise (Err "Can't invoke non-function.")
 
 and eval_ast env = function
   | TT.Symbol(x, _) ->
@@ -139,7 +139,7 @@ and eval_ast env = function
         v
 
       | None ->
-        raise (EvalErr ("can't find symbol '" ^ x ^ "'."))
+        raise (Err ("can't find symbol '" ^ x ^ "'."))
     end
 
   | TT.List(xs, _) ->
@@ -183,10 +183,13 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.ReaderErr err ->
+      | Reader.Err err ->
         print_err err
 
-      | EvalErr s ->
+      | Err s ->
+        print_err s
+
+      | Core.Err s ->
         print_err s
     done
   with

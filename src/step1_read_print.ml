@@ -20,7 +20,7 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.ReaderErr err ->
+      | Reader.Err err ->
         print_endline err
     done
   with End_of_file -> ()
