@@ -1,8 +1,8 @@
-(executable
+(executables
     (libraries str)
-    ; (name step0_repl)
-    ; (name step1_read_print)
-    ; (name step2_eval)
-    ; (name step3_env)
-    (name step4_if_fn_do)
-)
+    (names
+      step0_repl
+      step1_read_print
+      step2_eval
+      step3_env
+      step4_if_fn_do))
