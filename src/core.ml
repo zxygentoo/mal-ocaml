@@ -47,29 +47,25 @@ let add_core_fns env =
       (comp_fn ( >= )) ;
 
     set "pr-str"
-      (function xs ->
-         TT.String
-           (String.concat " " (List.map (fun s -> pr_str true s) xs))) ;
+      (function v ->
+         TT.String (String.concat " " (List.map (pr_str true) v))) ;
 
     set "str"
-      (function xs ->
-         TT.String
-           (String.concat "" (List.map (fun s -> pr_str false s) xs))) ;
+      (function v ->
+         TT.String (String.concat " " (List.map (pr_str false) v))) ;
 
     set "prn"
-      (function xs ->
-         print_endline
-           (String.concat " " (List.map (fun s -> pr_str true s) xs)) ;
+      (function v ->
+         print_endline (String.concat " " (List.map (pr_str true) v)) ;
          T.nil) ;
 
     set "println"
-      (function xs ->
-         print_endline
-           (String.concat " " (List.map (fun s -> pr_str false s) xs)) ;
+      (function v ->
+         print_endline (String.concat " " (List.map (pr_str false) v)) ;
          T.nil) ;
 
     set "list"
-      (fun xs -> T.list xs) ;
+      (fun v -> T.list v) ;
 
     set "list?"
       (function
@@ -84,8 +80,8 @@ let add_core_fns env =
 
     set "count"
       (function
-        | [TT.List(xs, _)]
-        | [TT.Vector(xs, _)] -> T.int (List.length xs)
+        | [TT.List(v, _)]
+        | [TT.Vector(v, _)] -> T.int (List.length v)
         | _ -> T.int 0) ;
 
     set "="
