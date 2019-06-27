@@ -26,14 +26,16 @@ let tokenize s =
 
   let seg rs =
     List.filter
-      (function | Str.Delim _ -> true
-                | Str.Text _ -> false)
+      (function
+      | Str.Delim _ -> true
+      | Str.Text _ -> false)
       rs in
 
   let to_str rs =
     List.map
-      (function | Str.Delim x -> x
-                | Str.Text _ -> raise (Err "Tokenization error."))
+      (function
+      | Str.Delim x -> x
+      | Str.Text _ -> raise (Err "Tokenization error."))
       rs in
 
   let filter_empty_str ss =
@@ -123,8 +125,8 @@ and read_salar token =
   try
     T.int (int_of_string token)
   with
-  | Failure _ -> begin
-      match token with
+  | Failure _ ->
+    begin match token with
       | "nil" ->
         T.nil
 
@@ -134,8 +136,8 @@ and read_salar token =
       | "false" ->
         T.malfalse
 
-      | _ -> begin
-          let len = String.length token in
+      | _ ->
+          begin let len = String.length token in
           match List.init len (String.get token) with
           | [] ->
             raise (Err "Unexpected end of input.")
