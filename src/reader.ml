@@ -1,18 +1,24 @@
 module T = Types
 
+
 exception Err of string
 exception Nothing
 
+
 (* helpers *)
 
-let gsub re f str =
+let split re s =
+  Str.full_split re s
+
+
+let gsub re f s =
   String.concat
     ""
     (List.map
       (function
         | Str.Delim x -> f x
         | Str.Text x -> x)
-      (Str.full_split re str))
+      (split re s))
 
 
 (* tokenization *)
@@ -22,10 +28,7 @@ let token_re =
     "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\\|[^][  \n{}('\"`,;)]*"
 
 let tokenize s =
-  let split s =
-    Str.full_split token_re s in
-
-  let seg rs =
+  let filter_delims rs =
     List.filter
       (function
       | Str.Delim _ -> true
@@ -39,10 +42,11 @@ let tokenize s =
       | Str.Text _ -> raise (Err "Tokenization error."))
       rs in
 
-  let filter_empty_str ss =
+  let filter_not_empty ss =
     List.filter ((<>) "") ss in
 
-  s |> split |> seg |> to_str |> filter_empty_str
+  s |> split token_re |> filter_delims |> to_str |> filter_not_empty
+
 
 (* read functions *)
 
