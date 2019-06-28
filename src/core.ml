@@ -8,14 +8,20 @@ exception Err of string
 
 let arith_fn f =
   function
-  | [TT.Int(a); TT.Int(b)] -> TT.Int(f a b)
-  | _ -> raise (Err "Arithmetic functions require two int arguments.")
+  | [TT.Int(a); TT.Int(b)] ->
+    TT.Int(f a b)
+
+  | _ ->
+    raise (Err "Arithmetic functions require two int arguments.")
 
 
 let comp_fn f =
   function
-  | [TT.Int(a); TT.Int(b)] -> TT.Bool(f a b)
-  | _ -> raise (Err "Arithmetic compare require two int arguments.")  
+  | [TT.Int(a); TT.Int(b)] ->
+    TT.Bool(f a b)
+
+  | _ ->
+    raise (Err "Arithmetic comparisons require two int arguments.")
 
 
 let add_core_defs env =
