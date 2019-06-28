@@ -11,6 +11,7 @@ exception Err of string
 let red s =
   "\027[31m" ^ s ^ "\027[0m"
 
+
 let print_err msg =
   print_endline (red ("Error: " ^ msg))
 
