@@ -18,7 +18,7 @@ let comp_fn f =
   | _ -> raise (Err "Arithmetic compare require two int arguments.")  
 
 
-let add_core_fns env =
+let add_core_defs env =
   let pr_str = Printer.string_of_maltype in
   let set s f = E.set s (T.fn f) env in
   begin
@@ -92,5 +92,5 @@ let add_core_fns env =
 
 
 let init env =
-  add_core_fns env ;
+  add_core_defs env ;
   env
