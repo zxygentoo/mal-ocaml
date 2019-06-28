@@ -163,17 +163,18 @@ let print exp =
   Printer.print_str exp
 
 
-let repl_env = E.make (Some Core.core_ns)
-
-
-let rep str =
-  str |> read |> eval repl_env |> print
-
-
 let main =
-  let print_err s =
-    print_endline ("Error: " ^ s)
-  in
+  let red s =
+    "\027[31m" ^ s ^ "\027[0m" in
+
+  let print_err msg =
+    print_endline (red ("Error: " ^ msg)) in
+
+  let repl_env = Core.init (E.root ()) in
+
+  let rep str =
+    str |> read |> eval repl_env |> print in
+
   try
     while true do
       print_string "user> " ;
@@ -183,14 +184,14 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.Err err ->
-        print_err err
+      | Reader.Err msg ->
+        print_err msg
 
-      | Err s ->
-        print_err s
+      | Err msg ->
+        print_err msg
 
-      | Core.Err s ->
-        print_err s
+      | Core.Err msg ->
+        print_err msg
     done
   with
   | End_of_file ->

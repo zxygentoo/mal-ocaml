@@ -141,11 +141,11 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.Err err ->
-        print_err err
+      | Reader.Err msg ->
+        print_err msg
 
-      | Err s ->
-        print_err s
+      | Err msg ->
+        print_err msg
     done
   with
   | End_of_file ->

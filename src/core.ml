@@ -91,7 +91,6 @@ let add_core_fns env =
   end
 
 
-let core_ns =
-  let env = E.root () in
+let init env =
   add_core_fns env ;
   env

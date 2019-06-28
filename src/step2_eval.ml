@@ -89,8 +89,8 @@ let main =
       | Reader.Err err ->
         print_err err
 
-      | Err s ->
-        print_err s
+      | Err msg ->
+        print_err msg
     done
   with
   | End_of_file ->

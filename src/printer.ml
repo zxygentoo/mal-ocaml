@@ -17,16 +17,7 @@ let rec string_of_maltype print_readably exp =
     string_of_int i
 
   | T.String(s) ->
-    if r
-    then  "\"" ^ 
-          (Reader.gsub
-             (Str.regexp "\\([\"\\\n]\\)")
-             (function
-               | "\n" -> "\\n"
-               | x -> "\\" ^ x)
-             s) ^ 
-          "\""
-    else s
+    if r then  "\"" ^ (Scanf.unescaped s) ^ "\"" else s
 
   | T.Keyword(kw) ->
     ":" ^ kw
@@ -34,23 +25,20 @@ let rec string_of_maltype print_readably exp =
   | T.Symbol(s, _) ->
     s
 
-  | T.List(xs, _) ->
-    string_of_list_or_vector r xs "(" ")"
+  | T.List(v, _) ->
+    string_of_list_or_vector r v "(" ")"
 
-  | T.Vector(xs, _) ->
-    string_of_list_or_vector r xs "[" "]"
+  | T.Vector(v, _) ->
+    string_of_list_or_vector r v "[" "]"
 
-  | T.Map(xs, _) ->
+  | T.Map(v, _) ->
     "{" ^ 
     (Types.MalMap.fold
        (fun k v s ->
-          s ^
-          (if s = "" then "" else ", ") ^
+          s ^ (if s = "" then "" else ", ") ^
           (string_of_maltype r k) ^ " " ^ (string_of_maltype r v))
-       xs 
-       ""
-    ) ^
-    "}"
+       v
+       "") ^ "}"
 
   | T.Fn(_, _) ->
     "#<function>"
@@ -59,10 +47,8 @@ let rec string_of_maltype print_readably exp =
     "(atom " ^ (string_of_maltype r !x) ^ ")"
 
 
-and string_of_list_or_vector r xs sol eol=
-  sol ^
-  (String.concat " " (List.map (fun s -> string_of_maltype r s) xs)) ^
-  eol
+and string_of_list_or_vector r v sol eol=
+  sol ^ (String.concat " " (List.map (fun s -> string_of_maltype r s) v)) ^ eol
 
 
 (* api *)

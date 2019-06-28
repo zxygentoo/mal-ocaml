@@ -5,47 +5,30 @@ exception Err of string
 exception Nothing
 
 
-(* helpers *)
+(* constants *)
 
-let split re s =
-  Str.full_split re s
-
-
-let gsub re f s =
-  String.concat
-    ""
-    (List.map
-      (function
-        | Str.Delim x -> f x
-        | Str.Text x -> x)
-      (split re s))
+let int_re = Str.regexp "-?[0-9]+$"
+let token_re = Str.regexp "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\\|[^][  \n{}('\"`,;)]*"
 
 
 (* tokenization *)
 
-let token_re =
-  Str.regexp
-    "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\\|[^][  \n{}('\"`,;)]*"
-
 let tokenize s =
-  let filter_delims rs =
+  let filter_delims results =
     List.filter
       (function
-      | Str.Delim _ -> true
-      | Str.Text _ -> false)
-      rs in
+        | Str.Delim _ -> true
+        | Str.Text _ -> false)
+      results in
 
-  let to_str rs =
+  let strs_of_delims results =
     List.map
       (function
-      | Str.Delim x -> x
-      | Str.Text _ -> raise (Err "Tokenization error."))
-      rs in
+        | Str.Delim x -> x
+        | Str.Text _ -> raise (Err "Tokenization error."))
+      results in
 
-  let filter_not_empty ss =
-    List.filter ((<>) "") ss in
-
-  s |> split token_re |> filter_delims |> to_str |> filter_not_empty
+  s |> Str.full_split token_re |> filter_delims |> strs_of_delims
 
 
 (* read functions *)
@@ -54,6 +37,9 @@ let rec read_form tokens =
   match tokens with
   | [] ->
     raise Nothing
+
+  | "" :: xs ->
+    read_form xs
 
   | "(" :: xs ->
     read_list xs
@@ -95,17 +81,15 @@ and read_vector tokens =
 
 and read_map tokens =
   let forms, tokens_left = read_container "}" [] tokens in
-  begin
-    try
-      (T.map_of_list forms, tokens_left)
-    with T.Err s ->
-      raise (Err s)
-  end
+  try
+    (T.map_of_list forms, tokens_left)
+  with T.Err msg ->
+    raise (Err msg)
 
 and read_container eol forms tokens =
   match tokens with
   | [] ->
-    raise (Err "Unbanlanced input.")
+    raise (Err "Unbanlanced form.")
 
   | x :: xs when x = eol ->
     (forms, xs)
@@ -126,44 +110,37 @@ and read_with_meta tokens =
   let value, tokens_left = read_form tokens_left_meta in
   (Types.list [Types.symbol "with-meta"; value; meta], tokens_left)
 
-and read_salar token =
-  try
-    T.int (int_of_string token)
-  with
-  | Failure _ ->
-    begin match token with
-      | "nil" ->
-        T.nil
+and read_salar = function
+  | "nil" ->
+    T.nil
 
-      | "true" ->
-        T.maltrue
+  | "true" ->
+    T.maltrue
 
-      | "false" ->
-        T.malfalse
+  | "false" ->
+    T.malfalse
 
-      | _ ->
-          begin let len = String.length token in
-          match List.init len (String.get token) with
-          | [] ->
-            raise (Err "Unexpected end of input.")
+  | int_lit when (Str.string_match int_re int_lit 0) ->
+    T.int (int_of_string int_lit)
 
-          | x :: _ when x = '"' ->
-            if token.[len - 1] = '"'
-            then T.string (gsub
-                             (Str.regexp "\\\\.")
-                             (function
-                               | "\\n" -> "\n"
-                               | x -> String.sub x 1 1)
-                             (String.sub token 1 (len - 2)))
-            else raise (Err "Unexpected end of string literal.")
+  | "" ->
+    raise (Err "Unexpected end of input.")
 
-          | x :: _ when x = ':' ->
-            T.keyword (String.sub token 1 (len - 1))
+  | comment when comment.[0] = ';' ->
+    raise Nothing
 
-          | _ ->
-            T.symbol token
-        end
-    end
+  | str_lit when str_lit.[0] = '"' ->
+    let len = String.length str_lit in
+    if str_lit.[len - 1] <> '"' then
+      raise (Err "Unexpected end of string literal.")
+    else
+      T.string (String.escaped (String.sub str_lit 1 (len - 2)))
+
+  | kw_lit when kw_lit.[0] = ':' ->
+    T.keyword (String.sub kw_lit 1 (String.length kw_lit - 1))
+
+  | sym ->
+    T.symbol sym
 
 
 (* api *)
