@@ -30,7 +30,8 @@ let rec eval env ast =
   | _  ->
     eval_ast env ast
 
-and eval_def env = function
+and eval_def env =
+  function
   | [TT.Symbol(sym, _); expr] ->
     let value = eval env expr in
     E.set sym value env ;
@@ -39,7 +40,8 @@ and eval_def env = function
   | _ ->
     raise (Err "Illegal 'def!' form.")
 
-and eval_let env = function
+and eval_let env =
+  function
   | [TT.List(bindings, _); body]
 
   | [TT.Vector(bindings, _); body] ->
@@ -73,7 +75,8 @@ and apply_function env ast =
   | _ ->
     raise (Err "Can't invoke non-function.")
 
-and eval_ast env = function
+and eval_ast env =
+  function
   | TT.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->

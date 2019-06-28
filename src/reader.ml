@@ -33,8 +33,8 @@ let tokenize s =
 
 (* read functions *)
 
-let rec read_form tokens =
-  match tokens with
+let rec read_form =
+  function
   | [] ->
     raise Nothing
 
@@ -110,7 +110,8 @@ and read_with_meta tokens =
   let value, tokens_left = read_form tokens_left_meta in
   (Types.list [Types.symbol "with-meta"; value; meta], tokens_left)
 
-and read_salar = function
+and read_salar =
+  function
   | "nil" ->
     T.nil
 

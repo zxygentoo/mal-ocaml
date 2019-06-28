@@ -47,20 +47,20 @@ let add_core_defs env =
       (comp_fn ( >= )) ;
 
     set "pr-str"
-      (function v ->
+      (fun v ->
          TT.String (String.concat " " (List.map (pr_str true) v))) ;
 
     set "str"
-      (function v ->
+      (fun v ->
          TT.String (String.concat " " (List.map (pr_str false) v))) ;
 
     set "prn"
-      (function v ->
+      (fun v ->
          print_endline (String.concat " " (List.map (pr_str true) v)) ;
          T.nil) ;
 
     set "println"
-      (function v ->
+      (fun v ->
          print_endline (String.concat " " (List.map (pr_str false) v)) ;
          T.nil) ;
 

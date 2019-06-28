@@ -87,13 +87,15 @@ let fn x =
   Types.Fn(x, nil)
 
 
-let to_bool = function
+let to_bool =
+  function
   | Types.Nil
   | Types.Bool(false) -> false
   | _ -> true
 
 
-let is_list = function
+let is_list =
+  function
   | Types.List(_, _) -> true
   | _ -> false
 

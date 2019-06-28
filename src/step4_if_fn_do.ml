@@ -47,7 +47,8 @@ let rec eval env ast =
   | _  ->
     eval_ast env ast
 
-and eval_def env = function
+and eval_def env =
+  function
   | [TT.Symbol(sym, _); expr] ->
     let value = eval env expr in
     E.set sym value env ;
@@ -56,7 +57,8 @@ and eval_def env = function
   | _ ->
     raise (Err "Illegal 'def!' form.")
 
-and eval_let env = function
+and eval_let env =
+  function
   | [TT.List(bindings, _); body]
 
   | [TT.Vector(bindings, _); body] ->
@@ -82,7 +84,8 @@ and eval_let env = function
   | _ ->
     raise (Err "Illegal 'let*' form.")
 
-and eval_do env = function
+and eval_do env =
+  function
   | [] ->
     T.nil
 
@@ -93,7 +96,8 @@ and eval_do env = function
     eval env expr |> ignore ;
     eval_do env rest
 
-and eval_if env = function
+and eval_if env =
+  function
   | [pred ; then_expr] ->
     if T.to_bool (eval env pred)
     then (eval env then_expr)
@@ -107,7 +111,8 @@ and eval_if env = function
   | _ ->
     raise (Err "Illegal 'if' form.")
 
-and eval_fn env = function
+and eval_fn env =
+  function
   | [TT.List(arg_names, _); body]
 
   | [TT.Vector(arg_names, _); body] ->
@@ -143,7 +148,8 @@ and apply_function env ast =
   | _ ->
     raise (Err "Can't invoke non-function.")
 
-and eval_ast env = function
+and eval_ast env =
+  function
   | TT.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->
