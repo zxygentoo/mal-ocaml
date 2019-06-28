@@ -55,7 +55,7 @@ and eval_def env =
     value
 
   | _ ->
-    raise (Err "Illegal 'def!' form.")
+    raise (Err "Invalid 'def!' form.")
 
 and eval_let env =
   function
@@ -82,7 +82,7 @@ and eval_let env =
     eval let_env body
 
   | _ ->
-    raise (Err "Illegal 'let*' form.")
+    raise (Err "Invalid 'let*' form.")
 
 and eval_do env =
   function
@@ -109,7 +109,7 @@ and eval_if env =
     else (eval env else_expr)
 
   | _ ->
-    raise (Err "Illegal 'if' form.")
+    raise (Err "Invalid 'if' form.")
 
 and eval_fn env =
   function
@@ -138,7 +138,7 @@ and eval_fn env =
         eval fn_env body)
 
   | _ ->
-    raise (Err "Illegal 'fn*' from.")
+    raise (Err "Invalid 'fn*' from.")
 
 and apply_function env ast =
   match eval_ast env ast with
