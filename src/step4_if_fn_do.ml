@@ -42,7 +42,7 @@ let rec eval env ast =
     eval_fn env expr
 
   | TT.List(_, _) ->
-    apply_function env ast
+    apply_fn env ast
 
   | _  ->
     eval_ast env ast
@@ -140,7 +140,7 @@ and eval_fn env =
   | _ ->
     raise (Err "Invalid 'fn*' from.")
 
-and apply_function env ast =
+and apply_fn env ast =
   match eval_ast env ast with
   | TT.List(TT.Fn(f, _) :: args, _) ->
     f args

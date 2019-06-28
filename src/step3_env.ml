@@ -24,7 +24,7 @@ let rec eval env ast =
         eval_let env expr
 
       | _ ->
-        apply_function env ast
+        apply_fn env ast
     end
 
   | _  ->
@@ -67,7 +67,7 @@ and eval_let env =
   | _ ->
     raise (Err "Invalid 'let*' form.")
 
-and apply_function env ast =
+and apply_fn env ast =
   match eval_ast env ast with
   | TT.List(TT.Fn(f, _) :: args, _) ->
     f args
