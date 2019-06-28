@@ -6,6 +6,17 @@ module TT = Types.Types
 exception Err of string
 
 
+(* helpers *)
+
+let red s =
+  "\027[31m" ^ s ^ "\027[0m"
+
+let print_err msg =
+  print_endline (red ("Error: " ^ msg))
+
+
+(* REP functions *)
+
 let read str =
   Reader.read_str str
 
@@ -163,23 +174,19 @@ let print exp =
   Printer.print_str exp
 
 
+let rep env str =
+  str |> read |> eval env |> print
+
+(* REPL entry *)
+
 let main =
-  let red s =
-    "\027[31m" ^ s ^ "\027[0m" in
-
-  let print_err msg =
-    print_endline (red ("Error: " ^ msg)) in
-
   let repl_env = Core.init (E.root ()) in
-
-  let rep str =
-    str |> read |> eval repl_env |> print in
-
+  rep repl_env "(def! not (fn* (a) (if a false true)))" |> ignore ;
   try
     while true do
       print_string "user> " ;
       try
-        rep (read_line ()) ;
+        rep repl_env (read_line ()) ;
       with 
       | Reader.Nothing ->
         ()
