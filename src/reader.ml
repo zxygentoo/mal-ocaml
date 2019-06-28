@@ -5,7 +5,7 @@ exception Err of string
 exception Nothing
 
 
-(* constants *)
+(* regex patterns *)
 
 let int_re = Str.regexp "-?[0-9]+$"
 let token_re = Str.regexp "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\\|[^][  \n{}('\"`,;)]*"
