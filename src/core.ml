@@ -20,7 +20,8 @@ let comp_fn f =
 
 let add_core_defs env =
   let pr_str = Printer.string_of_maltype in
-  let set s f = E.set s (T.fn f) env in
+  let set s f =
+    E.set s (T.fn f) env in
   begin
     set "+"
       (arith_fn ( + )) ;
