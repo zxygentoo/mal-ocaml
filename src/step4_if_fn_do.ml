@@ -198,13 +198,7 @@ let main =
       | Reader.Nothing ->
         ()
 
-      | Reader.Err msg ->
-        print_err msg
-
-      | Err msg ->
-        print_err msg
-
-      | Core.Err msg ->
+      | Reader.Err msg | Core.Err msg | Err msg ->
         print_err msg
     done
   with
