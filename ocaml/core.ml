@@ -7,7 +7,7 @@ exception Err of string
 
 let slurp filename =
   let chan = open_in filename in
-  let b = Buffer.create 27 in
+  let b = Buffer.create 80 in
   Buffer.add_channel b chan (in_channel_length chan) ;
   close_in chan ;
   Buffer.contents b
