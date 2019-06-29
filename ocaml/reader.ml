@@ -132,7 +132,7 @@ and read_container eol forms tokens =
 
 and read_quote sym tokens =
   let form, tokens_left = read_form tokens in
-  (T.list [T.symbol sym; form], tokens_left)
+  (T.list [T.symbol sym ; form], tokens_left)
 
 and read_atom tokens =
   read_quote "deref" tokens
@@ -140,7 +140,7 @@ and read_atom tokens =
 and read_with_meta tokens =
   let meta, tokens_left_meta = read_form tokens in
   let value, tokens_left = read_form tokens_left_meta in
-  (Types.list [Types.symbol "with-meta"; value; meta], tokens_left)
+  (Types.list [Types.symbol "with-meta" ; value ; meta], tokens_left)
 
 and read_salar =
   function
