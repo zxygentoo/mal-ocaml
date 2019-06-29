@@ -6,18 +6,6 @@ module TT = Types.Types
 exception Err of string
 
 
-(* helpers *)
-
-let red s =
-  "\027[31m" ^ s ^ "\027[0m"
-
-
-let print_err msg =
-  print_endline (red ("Error: " ^ msg))
-
-
-(* REP functions *)
-
 let read str =
   Reader.read_str str
 
@@ -190,6 +178,16 @@ let re env s =
 
 let rep env s =
   s |> re env |> print
+
+
+(* helpers *)
+
+let red s =
+  "\027[31m" ^ s ^ "\027[0m"
+
+
+let print_err msg =
+  print_endline (red ("Error: " ^ msg))
 
 
 (* mal definitions *)
