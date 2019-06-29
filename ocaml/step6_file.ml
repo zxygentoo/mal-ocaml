@@ -189,7 +189,7 @@ let re env s =
 
 
 let rep env s =
-  s |> read |> eval env |> print
+  s |> re env |> print
 
 
 (* mal definitions *)
