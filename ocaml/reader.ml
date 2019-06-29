@@ -13,16 +13,20 @@ let token_re = Str.regexp "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\
 
 (* helpers *)
 
+let startswith s sol =
+  if String.length s = 0 then false else s.[0] = sol
+
+
 let is_comment s =
-  if String.length s = 0 then false else s.[0] = ';'
+  startswith s ';'
 
 
 let is_string_literal s =
-  if String.length s = 0 then false else s.[0] = '"'
+  startswith s '"'
 
 
 let is_keyword_literal s =
-  if String.length s = 0 then false else s.[0] = ':'
+  startswith s ':'
 
 
 let is_int_literal s =
