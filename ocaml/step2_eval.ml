@@ -55,7 +55,7 @@ let rep str =
   let arith_fn f =
     T.fn(
       function
-      | [TT.Int(a); TT.Int(b)] ->
+      | [TT.Int(a) ; TT.Int(b)] ->
         TT.Int(f a b)
 
       | _ ->

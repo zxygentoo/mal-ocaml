@@ -50,7 +50,7 @@ let rec eval env ast =
 
 and eval_def env =
   function
-  | [TT.Symbol(sym, _); expr] ->
+  | [TT.Symbol(sym, _) ; expr] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -60,9 +60,9 @@ and eval_def env =
 
 and eval_let env =
   function
-  | [TT.List(bindings, _); body]
+  | [TT.List(bindings, _) ; body]
 
-  | [TT.Vector(bindings, _); body] ->
+  | [TT.Vector(bindings, _) ; body] ->
     eval
       (make_let_env (E.make (Some env)) bindings)
       body
@@ -105,7 +105,7 @@ and eval_if env =
     else
       T.nil
 
-  | [pred; then_expr; else_expr] ->
+  | [pred ; then_expr ; else_expr] ->
     if T.to_bool (eval env pred) then
       (eval env then_expr)
     else
@@ -116,9 +116,9 @@ and eval_if env =
 
 and eval_fn env =
   function
-  | [TT.List(arg_syms, _); body]
+  | [TT.List(arg_syms, _) ; body]
 
-  | [TT.Vector(arg_syms, _); body] ->
+  | [TT.Vector(arg_syms, _) ; body] ->
     T.fn(
       fun args ->
         eval
@@ -130,7 +130,7 @@ and eval_fn env =
 
 and make_fn_env fn_env arg_syms args =
   match (arg_syms, args) with
-  | [TT.Symbol("&", _); TT.Symbol(k, _)], vs ->
+  | [TT.Symbol("&", _) ; TT.Symbol(k, _)], vs ->
     E.set k (T.list vs) fn_env ;
     fn_env
 

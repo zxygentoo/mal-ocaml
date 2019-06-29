@@ -32,7 +32,7 @@ let rec eval env ast =
 
 and eval_def env =
   function
-  | [TT.Symbol(sym, _); expr] ->
+  | [TT.Symbol(sym, _) ; expr] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -42,9 +42,9 @@ and eval_def env =
 
 and eval_let env =
   function
-  | [TT.List(bindings, _); body]
+  | [TT.List(bindings, _) ; body]
 
-  | [TT.Vector(bindings, _); body] ->
+  | [TT.Vector(bindings, _) ; body] ->
     let let_env = E.make (Some env) in
     let rec eval_let_bindings =
       function
@@ -112,7 +112,7 @@ let repl_env =
   let arith_fn f =
     T.fn(
       function
-      | [TT.Int(a); TT.Int(b)] ->
+      | [TT.Int(a) ; TT.Int(b)] ->
         TT.Int(f a b)
 
       | _ ->

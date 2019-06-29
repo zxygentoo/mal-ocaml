@@ -15,13 +15,13 @@ let slurp filename =
 
 let arith_fn f =
   function
-  | [TT.Int(a); TT.Int(b)] -> TT.Int(f a b)
+  | [TT.Int(a) ; TT.Int(b)] -> TT.Int(f a b)
   | _ -> raise (Err "Arithmetic functions require two int arguments.")
 
 
 let comp_fn f =
   function
-  | [TT.Int(a); TT.Int(b)] -> TT.Bool(f a b)
+  | [TT.Int(a) ; TT.Int(b)] -> TT.Bool(f a b)
   | _ -> raise (Err "Arithmetic comparisons require two int arguments.")
 
 
@@ -117,7 +117,7 @@ let add_core_defs env =
 
     set "reset!"
       (function
-        | [TT.Atom(x); v] -> x := v ; v
+        | [TT.Atom(x) ; v] -> x := v ; v
         | _ -> raise (Err "Invalid arguments for 'reset!'.")) ;
 
     set "swap!"
@@ -130,7 +130,7 @@ let add_core_defs env =
 
     set "="
       (function
-        | [a; b] -> TT.Bool (T.mal_equal a b)
+        | [a ; b] -> TT.Bool (T.mal_equal a b)
         | _ -> T.malfalse) ;
 
     (* misc *)
