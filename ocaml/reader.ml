@@ -39,7 +39,7 @@ let tokenize s =
         | Str.Text _ -> false)
       results in
 
-  let strs_of_delims results =
+  let delims_to_strs results =
     List.map
       (function
         | Str.Delim x -> x
@@ -49,7 +49,7 @@ let tokenize s =
   s
   |> Str.full_split token_re
   |> filter_delims
-  |> strs_of_delims
+  |> delims_to_strs
   |> List.filter (( <> ) "")
 
 
