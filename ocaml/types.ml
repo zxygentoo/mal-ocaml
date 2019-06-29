@@ -92,25 +92,14 @@ let fn x =
 let atom x =
   Types.Atom (ref x)
 
-(* type conversion and testing *)
+
+(* truthiness *)
 
 let to_bool =
   function
   | Types.Nil
   | Types.Bool(false) -> false
   | _ -> true
-
-
-let is_list =
-  function
-  | Types.List(_, _) -> true
-  | _ -> false
-
-
-let is_atom =
-  function
-  | Types.Atom(_) -> true
-  | _ -> false
 
 
 (* equality *)
