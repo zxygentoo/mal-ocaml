@@ -13,7 +13,7 @@ let red s =
 
 
 let print_err msg =
-  print_endline (red ("Error: " ^ msg))
+  print_endline ("Error: " ^ msg)
 
 
 (* REP functions *)
@@ -158,7 +158,7 @@ and eval_ast env =
         v
 
       | None ->
-        raise (Err ("can't find symbol '" ^ x ^ "'."))
+        raise (Err ("Symbol '" ^ x ^ "' not found."))
     end
 
   | TT.List(xs, _) ->

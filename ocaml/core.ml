@@ -53,7 +53,7 @@ let add_core_defs env =
 
     set "str"
       (fun v ->
-         TT.String (String.concat " " (List.map (pr_str false) v))) ;
+         TT.String (String.concat "" (List.map (pr_str false) v))) ;
 
     set "prn"
       (fun v ->

@@ -83,7 +83,7 @@ and eval_ast env =
         v
 
       | None ->
-        raise (Err ("can't find symbol '" ^ x ^ "'."))
+        raise (Err ("Symbol '" ^ x ^ "' not found."))
     end
 
   | TT.List(xs, _) ->

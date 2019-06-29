@@ -17,7 +17,7 @@ let rec string_of_maltype print_readably exp =
     string_of_int i
 
   | T.String(s) ->
-    if r then  "\"" ^ (Scanf.unescaped s) ^ "\"" else s
+    if r then "\"" ^ (String.escaped s) ^ "\"" else s
 
   | T.Keyword(kw) ->
     ":" ^ kw

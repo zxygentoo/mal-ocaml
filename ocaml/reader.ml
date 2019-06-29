@@ -28,7 +28,11 @@ let tokenize s =
         | Str.Text _ -> raise (Err "Tokenization error."))
       results in
 
-  s |> Str.full_split token_re |> filter_delims |> strs_of_delims
+  s
+  |> Str.full_split token_re
+  |> filter_delims
+  |> strs_of_delims
+  |> List.filter (( <> ) "")
 
 
 (* read functions *)
@@ -89,7 +93,7 @@ and read_map tokens =
 and read_container eol forms tokens =
   match tokens with
   | [] ->
-    raise (Err "Unbanlanced form.")
+    raise (Err "Can't read unbalanced form.")
 
   | x :: xs when x = eol ->
     (forms, xs)
@@ -133,9 +137,9 @@ and read_salar =
   | str_lit when str_lit.[0] = '"' ->
     let len = String.length str_lit in
     if str_lit.[len - 1] <> '"' then
-      raise (Err "Unexpected end of string literal.")
+      raise (Err "Unexpected end of input.")
     else
-      T.string (String.escaped (String.sub str_lit 1 (len - 2)))
+      T.string (Scanf.unescaped (String.sub str_lit 1 (len - 2)))
 
   | kw_lit when kw_lit.[0] = ':' ->
     T.keyword (String.sub kw_lit 1 (String.length kw_lit - 1))
