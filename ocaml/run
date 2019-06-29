@@ -1,0 +1,3 @@
+#!/bin/bash
+# exec $(dirname $0)/${STEP:-stepA_mal} "${@}"
+rlwrap $(dirname $0)/_build/default/${STEP:-stepA_mal}.exe "${@}"
