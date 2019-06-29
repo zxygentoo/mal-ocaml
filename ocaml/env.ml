@@ -27,7 +27,8 @@ let rec find k env =
   | Some(_) ->
     Some(env)
 
-  | None -> begin match env.outer with
+  | None ->
+    begin match env.outer with
       | None ->
         None
 
