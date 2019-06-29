@@ -63,27 +63,27 @@ and eval_let env =
   | [TT.List(bindings, _); body]
 
   | [TT.Vector(bindings, _); body] ->
-    let let_env = E.make (Some env) in
-    let rec eval_let_bindings =
-      function
-      | TT.Symbol(k, _) :: expr :: rest ->
-        E.set k (eval let_env expr) let_env ;
-        eval_let_bindings rest
-
-      | _ :: _ :: _ ->
-        raise (Err "'let*' binding first element should be a symbol.")
-
-      | _ :: [] ->
-        raise (Err "'let*' bindings must have even number of elements.")
-
-      | [] ->
-        ()
-    in
-    eval_let_bindings bindings ;
-    eval let_env body
+    eval
+      (make_let_env (E.make (Some env)) bindings)
+      body
 
   | _ ->
     raise (Err "Invalid 'let*' form.")
+
+and make_let_env let_env =
+  function
+  | TT.Symbol(k, _) :: v :: bindings_left ->
+    E.set k (eval let_env v) let_env ;
+    make_let_env let_env bindings_left
+
+  | _ :: _ :: _ ->
+    raise (Err "'let*' binding first element should be a symbol.")
+
+  | _ :: [] ->
+    raise (Err "'let*' bindings must have even number of elements.")
+
+  | [] ->
+    let_env
 
 and eval_do env =
   function
@@ -114,32 +114,33 @@ and eval_if env =
 
 and eval_fn env =
   function
-  | [TT.List(arg_names, _); body]
+  | [TT.List(arg_syms, _); body]
 
-  | [TT.Vector(arg_names, _); body] ->
+  | [TT.Vector(arg_syms, _); body] ->
     T.fn(
       fun args ->
-        let fn_env = E.make (Some env) in
-        let rec bind_args ks vs =
-          match (ks, vs) with
-          | [TT.Symbol("&", _); TT.Symbol(name, _)], vs ->
-            E.set name (T.list vs) fn_env
-
-          | TT.Symbol(k, _) :: ks, v :: vs ->
-            E.set k v fn_env ;
-            bind_args ks vs
-
-          | [], [] ->
-            ()
-
-          | _ ->
-            raise (Err "Bad parameters count in 'fn*'.")
-        in
-        bind_args arg_names args ;
-        eval fn_env body)
+        eval
+          (make_fn_env (E.make (Some env)) arg_syms args)
+          body)
 
   | _ ->
     raise (Err "Invalid 'fn*' from.")
+
+and make_fn_env fn_env arg_syms args =
+  match (arg_syms, args) with
+  | [TT.Symbol("&", _); TT.Symbol(k, _)], vs ->
+    E.set k (T.list vs) fn_env ;
+    fn_env
+
+  | TT.Symbol(k, _) :: syms, v :: vs ->
+    E.set k v fn_env ;
+    make_fn_env fn_env syms vs
+
+  | [], [] ->
+    fn_env
+
+  | _ ->
+    raise (Err "Invalid number of parameters in 'fn*' form.")
 
 and apply_fn env ast =
   match eval_ast env ast with
