@@ -11,6 +11,24 @@ let int_re = Str.regexp "-?[0-9]+$"
 let token_re = Str.regexp "~@\\|[][{}()'`~^@]\\|\"\\(\\\\.\\|[^\"]\\)*\"?\\|;.*\\|[^][  \n{}('\"`,;)]*"
 
 
+(* helpers *)
+
+let is_comment s =
+  if String.length s = 0 then false else s.[0] = ';'
+
+
+let is_string_literal s =
+  if String.length s = 0 then false else s.[0] = '"'
+
+
+let is_keyword_literal s =
+  if String.length s = 0 then false else s.[0] = ':'
+
+
+let is_int_literal s =
+  Str.string_match int_re s 0
+
+
 (* tokenization *)
 
 let tokenize s =
@@ -43,6 +61,9 @@ let rec read_form =
     raise Nothing
 
   | "" :: xs ->
+    read_form xs
+
+  | x :: xs when is_comment x ->
     read_form xs
 
   | "(" :: xs ->
@@ -98,6 +119,9 @@ and read_container eol forms tokens =
   | x :: xs when x = eol ->
     (forms, xs)
 
+  | x :: xs when is_comment x ->
+    read_container eol forms xs
+
   | _ ->
     let form, tokens_left = read_form tokens in
     read_container eol (forms @ [form]) tokens_left
@@ -125,24 +149,18 @@ and read_salar =
   | "false" ->
     T.malfalse
 
-  | int_lit when (Str.string_match int_re int_lit 0) ->
-    T.int (int_of_string int_lit)
+  | x when is_int_literal x ->
+    T.int (int_of_string x)
 
-  | "" ->
-    raise (Err "Unexpected end of input.")
-
-  | comment when comment.[0] = ';' ->
-    raise Nothing
-
-  | str_lit when str_lit.[0] = '"' ->
-    let len = String.length str_lit in
-    if str_lit.[len - 1] <> '"' then
+  | x when is_string_literal x ->
+    let len = String.length x in
+    if x.[len - 1] <> '"' then
       raise (Err "Unexpected end of input.")
     else
-      T.string (Scanf.unescaped (String.sub str_lit 1 (len - 2)))
+      T.string (Scanf.unescaped (String.sub x 1 (len - 2)))
 
-  | kw_lit when kw_lit.[0] = ':' ->
-    T.keyword (String.sub kw_lit 1 (String.length kw_lit - 1))
+  | x when is_keyword_literal x ->
+    T.keyword (String.sub x 1 (String.length x - 1))
 
   | sym ->
     T.symbol sym

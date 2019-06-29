@@ -35,6 +35,8 @@ type maltype = MalValue.t
 exception Err of string
 
 
+(* saclars and constructor shortcuts *)
+
 let nil = Types.Nil
 let maltrue = Types.Bool true
 let malfalse = Types.Bool false
@@ -87,6 +89,11 @@ let fn x =
   Types.Fn(x, nil)
 
 
+let atom x =
+  Types.Atom (ref x)
+
+(* type conversion and testing *)
+
 let to_bool =
   function
   | Types.Nil
@@ -99,6 +106,14 @@ let is_list =
   | Types.List(_, _) -> true
   | _ -> false
 
+
+let is_atom =
+  function
+  | Types.Atom(_) -> true
+  | _ -> false
+
+
+(* equality *)
 
 let rec mal_equal a b =
   match a, b with
