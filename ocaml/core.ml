@@ -5,6 +5,7 @@ module E = Env
 
 exception Err of string
 
+
 let slurp filename =
   let chan = open_in filename in
   let b = Buffer.create 80 in
@@ -41,10 +42,10 @@ let add_core_defs env =
     set "*"
       (arith_fn ( * )) ;
 
-    (* arithmentic comparisions *)
-
     set "/"
       (arith_fn ( / )) ;
+
+    (* arithmentic comparisions *)
 
     set "<"
       (comp_fn ( < )) ;
@@ -138,8 +139,8 @@ let add_core_defs env =
     set "empty?"
       (function
         | [TT.List([], _)]
-        | [TT.Vector([], _)] -> TT.Bool true
-        | _ -> TT.Bool false) ;
+        | [TT.Vector([], _)] -> T.maltrue
+        | _ -> T.malfalse) ;
 
     set "count"
       (function

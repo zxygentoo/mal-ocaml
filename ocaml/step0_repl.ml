@@ -1,10 +1,18 @@
-let read str = read_line str
+let read str =
+  read_line str
 
-let eval _env ast = ast
 
-let print exp = print_endline exp
+let eval _env ast =
+  ast
 
-let rep x = x |> read |> eval None |> print
+
+let print exp =
+  print_endline exp
+
+
+let rep x =
+  x |> read |> eval None |> print
+
 
 let main =
   try

@@ -1,14 +1,18 @@
 let read str =
   Reader.read_str str
 
+
 let eval _env ast =
   ast
+
 
 let print exp =
   Printer.print_str exp
 
+
 let rep str =
   str |> read |> eval None |> print
+
 
 let main =
   try
