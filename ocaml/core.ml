@@ -179,7 +179,7 @@ let seq =
 let rec concat = 
   function
   | [] ->
-    T.list []
+    T.empty_list
 
   | [x] as v when T.is_container x ->
     seq v
@@ -189,6 +189,85 @@ let rec concat =
 
   | _ ->
     raise (Err "Invalid argument for 'concat'.")
+
+
+let meta =
+  function
+  | [v] ->
+    T.meta v
+
+  | _ ->
+    raise (Err "Invalid argument for 'meta'.")
+
+
+let with_meta =
+  function
+  | [ v ; m ] ->
+    T.with_meta v m
+
+  | _ ->
+    raise (Err "Invalid argument for 'with-meta'.")
+
+
+let macro_q =
+  function
+  | [x] ->
+    TT.Bool (T.is_macro x)
+
+  | _ ->
+    raise (Err "Invalid argument for 'macro?.")
+
+
+let nth =
+  function
+  | [ TT.List(xs, _) ; TT.Int i ]
+  | [ TT.Vector(xs, _) ; TT.Int i ] ->
+    begin match List.nth_opt xs i with
+      | Some v ->
+        v
+
+      | None ->
+        raise (Err "Index out of range.")
+    end
+
+  | _ ->
+    raise (Err "Invalid argument for 'nth'.")
+
+
+let first =
+  function
+  | [TT.Nil] ->
+    T.nil
+
+  | [TT.List(xs, _)]
+
+  | [TT.Vector(xs, _)] ->
+    begin try
+        List.hd xs
+      with Failure _ ->
+        T.nil
+    end
+
+  | _ ->
+    raise (Err "Invalid argument for 'first'.")
+
+
+let rest =
+  function
+  | [TT.Nil] ->
+    T.empty_list
+
+  | [TT.List(xs, _)]
+
+  | [TT.Vector(xs, _)] ->
+    begin try
+        T.list (List.tl xs)
+      with Failure _ ->
+        T.empty_list
+    end
+
+  | _ ->
+    raise (Err "Invalid argument for 'rest'.")
 
 
 let init env =
@@ -229,5 +308,14 @@ let init env =
   set "concat" concat ;
 
   set "seq" seq ;
+
+  set "meta" meta ;
+  set "with-meta" with_meta ;
+
+  set "macro?" macro_q ;
+
+  set "nth" nth ;
+  set "first" first ;
+  set "rest" rest ;
 
   env

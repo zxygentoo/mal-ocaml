@@ -35,8 +35,6 @@ type maltype = MalValue.t
 exception Err of string
 
 
-(* saclars and constructor shortcuts *)
-
 let nil = Types.Nil
 let maltrue = Types.Bool true
 let malfalse = Types.Bool false
@@ -62,8 +60,14 @@ let list x =
   Types.List(x, nil)
 
 
+let empty_list = list []
+
+
 let vector x = 
   Types.Vector(x, nil)
+
+
+(* let empty_vector = vector [] *)
 
 
 let map x =
@@ -93,8 +97,6 @@ let atom x =
   Types.Atom (ref x)
 
 
-(* type perdicates *)
-
 let is_container =
   function
   | Types.List _
@@ -107,7 +109,6 @@ let is_container =
   | _ ->
     false
 
-(* truthiness and type conversions *)
 
 let to_bool =
   function
@@ -137,7 +138,107 @@ let concat_containers a b =
     raise (Err "Invalid argument for '( @ )': can only concat two sequnences.")
 
 
-(* equality *)
+let meta =
+  function
+  | Types.Symbol(_, meta)
+
+  | Types.List(_, meta)
+
+  | Types.Vector(_, meta)
+
+  | Types.Map(_, meta)
+
+  | Types.Fn(_, meta) ->
+    meta
+
+  | _ ->
+    raise (Err "Metadata not supported on this type.")
+
+
+(* Mal guides doesn't specify these details, so we do what Clojure does. *)
+let parse_meta =
+  function
+  | Types.Symbol(s, _)
+
+  | Types.String s ->
+    map_of_list [ keyword "tag" ; string s ]
+
+  | Types.Keyword kw ->
+    map_of_list [ keyword kw ; maltrue ]
+
+  | Types.Map(m, _) ->
+    map m
+
+  | _ ->
+    raise (Err "Metadata must be a symbol, keyword, string or map.")
+
+
+let with_meta value meta =
+  let meta' = parse_meta meta in
+  match value with
+
+  | Types.Symbol(x, _) ->
+    Types.Symbol(x, meta')
+
+  | Types.List(x, _) ->
+    Types.List(x, meta')
+
+  | Types.Vector(x, _) ->
+    Types.Vector(x, meta')
+
+  | Types.Map(x, _) ->
+    Types.Map(x, meta')
+
+  | Types.Fn(x, _) ->
+    Types.Fn(x, meta')
+
+  | _ ->
+    raise (Err "Metadata not supported on this type.")
+
+
+let macro_kw = keyword "macro"
+
+
+let set_macro =
+  function
+  | Types.Fn(x, meta) ->
+    begin match meta with
+      | Map(m, _) ->
+        Types.Fn(x, map(MalMap.add macro_kw maltrue m))
+
+      | Types.Nil ->
+        Types.Fn(x, map(MalMap.add macro_kw maltrue MalMap.empty))
+
+      | _ ->
+        raise (Err "Can't set macro, invalid metadata.")
+    end
+  | _ ->
+    raise (Err "Macro must be a function.")
+
+
+let is_macro =
+  function
+  | Types.Fn(_, Types.Map(meta, _)) ->
+    MalMap.find_opt macro_kw meta = Some maltrue
+
+  | _ ->
+    false
+
+
+let can_be_meta =
+  function
+  | Types.Symbol _
+
+  | Types.String _
+
+  | Types.Keyword _
+
+  | Types.Map _ ->
+    true
+
+  | _ ->
+    false
+
 
 let rec mal_equal a b =
   match a, b with
