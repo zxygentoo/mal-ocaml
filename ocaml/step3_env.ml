@@ -100,8 +100,8 @@ and eval_ast env =
         T.MalMap.empty
     )
 
-  | _ as scalar ->
-    scalar
+  | _ as ast ->
+    ast
 
 
 let print exp =

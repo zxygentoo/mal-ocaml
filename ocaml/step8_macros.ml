@@ -54,6 +54,7 @@ and macroexpand env =
     begin match E.get x env with
       | Some(Fn(f, _) as fn) when T.is_macro fn ->
         macroexpand env (f args)
+
       | _ ->
         ast
     end
@@ -63,7 +64,7 @@ and macroexpand env =
 
 and eval_def env =
   function
-  | [TT.Symbol(sym, _meta) ; expr] ->
+  | [ TT.Symbol(sym, _) ; expr ] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -73,12 +74,12 @@ and eval_def env =
 
 and eval_defmacro env =
   function
-  | [TT.Symbol(sym, _) ; expr] ->
+  | [ TT.Symbol(sym, _) ; expr ] ->
     begin match eval env expr with
-      | TT.Fn _ as f ->
-        let macro_f = T.set_macro f in
-        E.set sym macro_f env ;
-        macro_f
+      | TT.Fn _ as fn ->
+        let macro = T.set_macro fn in
+        E.set sym macro env ;
+        macro
       | _ ->
         raise (Err "Invalid 'defmacro!' form: must be a function.")
     end
@@ -239,8 +240,8 @@ and eval_ast env =
         xs
         T.MalMap.empty)
 
-  | _ as scalar ->
-    scalar
+  | _ as ast ->
+    ast
 
 
 let print exp =
