@@ -6,7 +6,54 @@ module E = Env
 exception Err of string
 
 
-let slurp filename =
+let arith_fn f =
+  function
+  | [ TT.Int a ; TT.Int b ] ->
+    TT.Int(f a b)
+
+  | _ ->
+    raise (Err "Arithmetic functions require two int arguments.")
+
+
+let comp_fn f =
+  function
+  | [ TT.Int a ; TT.Int b ] ->
+    TT.Bool(f a b)
+
+  | _ ->
+    raise (Err "Arithmetic comparisons require two int arguments.")
+
+
+let pr_str_list sep readable xs =
+  String.concat sep (List.map (Printer.string_of_maltype readable) xs)
+
+
+let pr_str v =
+  T.string (pr_str_list " " true v)
+
+let str v =
+  T.string (pr_str_list "" false v)
+
+
+let prn v =
+  print_endline (pr_str_list " " true v) ;
+  T.nil
+
+let println v =
+  print_endline (pr_str_list " " false v) ;
+  T.nil
+
+
+let read_string =
+  function
+  | [ TT.String s ] ->
+    Reader.read_str s
+
+  | _ ->
+    raise (Err "Invalid argument for read-string")
+
+
+let slurp_caml filename =
   let chan = open_in filename in
   let b = Buffer.create 80 in
   Buffer.add_channel b chan (in_channel_length chan) ;
@@ -14,142 +61,173 @@ let slurp filename =
   Buffer.contents b
 
 
-let arith_fn f =
+let slurp =
   function
-  | [TT.Int(a) ; TT.Int(b)] -> TT.Int(f a b)
-  | _ -> raise (Err "Arithmetic functions require two int arguments.")
+  | [ TT.String s ] ->
+    T.string(slurp_caml s)
+
+  | _ ->
+    raise (Err "Invalid arguments for 'slurp'.")
 
 
-let comp_fn f =
+let list_q =
   function
-  | [TT.Int(a) ; TT.Int(b)] -> TT.Bool(f a b)
-  | _ -> raise (Err "Arithmetic comparisons require two int arguments.")
+  | [ TT.List _ ] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
 
 
-let add_core_defs env =
-  let pr_str = Printer.string_of_maltype in
-  let set s f =
-    E.set s (T.fn f) env in
-  begin
-    (* arithmetic operations *)
+let atom =
+  function
+  | [v] ->
+    T.atom v
 
-    set "+"
-      (arith_fn ( + )) ;
+  | _ ->
+    raise (Err "Invalid arguments for 'atom'.")
 
-    set "-"
-      (arith_fn ( - )) ;
 
-    set "*"
-      (arith_fn ( * )) ;
+let atom_q =
+  function
+  | [ TT.Atom _ ] ->
+    T.maltrue
 
-    set "/"
-      (arith_fn ( / )) ;
+  | _ ->
+    T.malfalse
 
-    (* arithmentic comparisions *)
 
-    set "<"
-      (comp_fn ( < )) ;
+let deref =
+  function
+  | [ TT.Atom(x) ] ->
+    !x
 
-    set "<="
-      (comp_fn ( <= )) ;
+  | _ ->
+    raise (Err "Invalid arguments for 'deref'.")
 
-    set ">"
-      (comp_fn ( > )) ;
 
-    set ">="
-      (comp_fn ( >= )) ;
+let reset_b =
+  function
+  | [ TT.Atom(x) ; v ] ->
+    x := v ;
+    v
 
-    (* printing related *)
+  | _ ->
+    raise (Err "Invalid arguments for 'reset!'.")
 
-    set "pr-str"
-      (fun v ->
-         TT.String (String.concat " " (List.map (pr_str true) v))) ;
 
-    set "str"
-      (fun v ->
-         TT.String (String.concat "" (List.map (pr_str false) v))) ;
+let swap_b =
+  function
+  | TT.Atom x :: TT.Fn(f, _) :: args ->
+    let v = f (!x :: args) in
+    x := v ;
+    v
 
-    set "prn"
-      (fun v ->
-         print_endline (String.concat " " (List.map (pr_str true) v)) ;
-         T.nil) ;
+  | _ ->
+    raise (Err "Invalid arguments for 'swap!'.")
 
-    set "println"
-      (fun v ->
-         print_endline (String.concat " " (List.map (pr_str false) v)) ;
-         T.nil) ;
 
-    (* reading related *)
+let eq =
+  function
+  | [ a ; b ] ->
+    TT.Bool (T.mal_equal a b)
 
-    set "read-string"
-      (function [TT.String x] -> Reader.read_str x | _ -> T.nil) ;
+  | _ ->
+    T.malfalse
 
-    set "slurp"
-      (function
-        | [TT.String(s)] -> T.string(slurp s)
-        | _ -> raise (Err "input for 'slurp' must be a single string.")) ;
 
-    (* type testing and value construction *)
+let empty_q =function
+  | [ TT.List([], _) ]
 
-    set "list"
-      (fun v -> T.list v) ;
+  | [ TT.Vector([], _) ] ->
+    T.maltrue
 
-    set "list?"
-      (function
-        | [TT.List _] -> T.maltrue
-        | _ -> T.malfalse) ;
+  | _ ->
+    T.malfalse
 
-    set "atom"
-      (function
-        | [v] -> T.atom v
-        | _ -> raise (Err "Invalid arguments for 'atom'.")) ;
 
-    set "atom?"
-      (function
-        | [TT.Atom _] -> T.maltrue
-        | _ -> T.malfalse) ;
+let count =
+  function
+  | [ TT.List(v, _) ]
 
-    (* atom related *)
+  | [ TT.Vector(v, _) ] ->
+    T.int (List.length v)
 
-    set "deref"
-      (function
-        | [TT.Atom(x)] -> !x
-        | _ -> raise (Err "Invalid arguments for 'deref'.")) ;
+  | _ ->
+    T.int 0
 
-    set "reset!"
-      (function
-        | [TT.Atom(x) ; v] -> x := v ; v
-        | _ -> raise (Err "Invalid arguments for 'reset!'.")) ;
 
-    set "swap!"
-      (function
-        | TT.Atom(x) :: TT.Fn(f, _) :: args ->
-          let v = f (!x :: args) in x := v ; v
-        | _ -> raise (Err "Invalid arguments for 'swap!'.")) ;
+let cons =
+  function
+  | [ x ; TT.List(xs, _) ]
 
-    (* equality *)
+  | [ x ; TT.Vector(xs, _) ] ->
+    T.list (x :: xs)
 
-    set "="
-      (function
-        | [a ; b] -> TT.Bool (T.mal_equal a b)
-        | _ -> T.malfalse) ;
+  | _ ->
+    raise (Err "Invalid argument for 'cons'.")
 
-    (* misc *)
 
-    set "empty?"
-      (function
-        | [TT.List([], _)]
-        | [TT.Vector([], _)] -> T.maltrue
-        | _ -> T.malfalse) ;
+let seq =
+  function
+  | [x] ->
+    T.list (T.list_of_container x)
+  | _ ->
+    raise (Err "Invalid argument for 'seq'.")
 
-    set "count"
-      (function
-        | [TT.List(v, _)]
-        | [TT.Vector(v, _)] -> T.int (List.length v)
-        | _ -> T.int 0) ;
-  end
+
+let rec concat = 
+  function
+  | [] ->
+    T.list []
+
+  | [x] as v when T.is_container x ->
+    seq v
+
+  | a :: b :: rest when T.is_container a && T.is_container b ->
+    concat (T.concat_containers a b :: rest)
+
+  | _ ->
+    raise (Err "Invalid argument for 'concat'.")
 
 
 let init env =
-  add_core_defs env ;
+  let set s f =
+    E.set s (T.fn f) env in
+
+  set "+" (arith_fn ( + )) ;
+  set "-" (arith_fn ( - )) ;
+  set "*" (arith_fn ( * )) ;
+  set "/" (arith_fn ( / )) ;
+
+  set "<"  (comp_fn ( < )) ;
+  set "<=" (comp_fn ( <= )) ;
+  set ">"  (comp_fn ( > )) ;
+  set ">=" (comp_fn ( >= )) ;
+
+  set "pr-str" pr_str ;
+  set "str" str ;
+  set "prn" prn ;
+  set "println" println ;
+  set "read-string" read_string ;
+  set "slurp" slurp ;
+
+  set "list" T.list ;
+  set "list?" list_q ;
+  set "atom" atom ;
+  set "atom?" atom_q ;
+
+  set "deref" deref ;
+  set "reset!" reset_b ;
+  set "swap!" swap_b ;
+
+  set "=" eq ;
+  set "empty?" empty_q ;
+  set "count" count ;
+
+  set "cons" cons ;
+  set "concat" concat ;
+
+  set "seq" seq ;
+
   env

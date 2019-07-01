@@ -93,13 +93,48 @@ let atom x =
   Types.Atom (ref x)
 
 
-(* truthiness *)
+(* type perdicates *)
+
+let is_container =
+  function
+  | Types.List _
+
+  | Types.Vector _
+
+  | Types.Map _ ->
+    true
+
+  | _ ->
+    false
+
+(* truthiness and type conversions *)
 
 let to_bool =
   function
   | Types.Nil
   | Types.Bool(false) -> false
   | _ -> true
+
+
+let list_of_container =
+  function
+  | Types.List(xs, _)
+
+  | Types.Vector(xs, _) ->
+    xs
+
+  | Types.Map(xs, _) ->
+    MalMap.fold (fun k v m -> vector [ k ; v ] :: m) xs [] |> List.rev
+
+  | _ ->
+    raise (Err "Invalid argument for 'list_of_container': not a list/vector/map.")
+
+
+let concat_containers a b =
+  if is_container a && is_container b then
+    list((list_of_container a) @ (list_of_container b))
+  else
+    raise (Err "Invalid argument for '( @ )': can only concat two sequnences.")
 
 
 (* equality *)
