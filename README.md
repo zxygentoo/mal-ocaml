@@ -1,6 +1,6 @@
 # mal-ocaml
 
-My implementation of [Mal](https://github.com/kanaka/mal)(Make-A-Lisp) in OCaml.
+My implementation of [Mal](https://github.com/kanaka/mal) (Make-A-Lisp) in OCaml.
 
 [Make-A-Lisp Guide](https://github.com/kanaka/mal/blob/master/process/guide.md)
 
@@ -8,7 +8,7 @@ My implementation of [Mal](https://github.com/kanaka/mal)(Make-A-Lisp) in OCaml.
 
 You'll need a working ocaml compiler and dune for building things, and make, obviously, with python for running the mal project test suite.
 
-Tested on ocaml 4.07.0 and dune 1.10.0.
+*(tested on ocaml 4.07.0 and dune 1.10.0)*
 
 ```bash
 make rust
