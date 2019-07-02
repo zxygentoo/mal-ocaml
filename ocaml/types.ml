@@ -162,7 +162,7 @@ let set_macro =
         Types.Fn(x, map(MalMap.add macro_kw maltrue MalMap.empty))
 
       | _ ->
-        raise (Err "Can't set macro, invalid metadata.")
+        raise (Err "to set macro, meta must be a map/nil.")
     end
   | _ ->
     raise (Err "Macro must be a function.")
