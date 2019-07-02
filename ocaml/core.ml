@@ -269,6 +269,215 @@ let rest =
   | _ ->
     raise (Err "Invalid argument for 'rest'.")
 
+let throw =
+  function
+  | [ast] -> raise (T.MalExn ast)
+
+  | _ ->
+    raise (Err "Invalid argument for 'throw'.")
+
+
+let apply =
+  function
+  | TT.Fn(f, _) :: apply_args ->
+    begin match List.rev apply_args with
+      | last_arg :: rev_args ->
+        f ((List.rev rev_args) @ (T.list_of_container last_arg))
+      | [] -> f []
+    end
+  | _ ->
+    raise (Invalid_argument "First arg to apply must be a fn")
+
+
+let map =
+  function
+  | [ TT.Fn(f, _) ; xs ] ->
+    T.list (List.map (fun x -> f [x]) (T.list_of_container xs))
+
+  | _ ->
+    raise (Invalid_argument "First arg to apply must be a fn")
+
+
+let nil_q =
+  function
+  | [TT.Nil] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let true_q =
+  function
+  | [TT.Bool true] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let false_q =
+  function
+  | [TT.Bool false] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let string_q =
+  function
+  | [TT.String _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let symbol_q =
+  function
+  | [TT.Symbol _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let keyword_q =
+  function
+  | [TT.Keyword _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let vector_q =
+  function
+  | [TT.Vector _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let sequential_q =
+  function
+  | [TT.List _]
+
+  | [TT.Vector _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let map_q =
+  function
+  | [TT.Map _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let fn_q =
+  function
+  | [TT.Fn _] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
+let symbol =
+  function
+  | [TT.String s] ->
+    T.symbol s
+
+  | _ ->
+    raise (Err "Invalid argument for 'symbol'.")
+
+
+let keyword =
+  function
+  | [TT.String s] ->
+    T.keyword s
+
+  | _ ->
+    raise (Err "Invalid argument for 'keyword'.")
+
+
+let rec assoc =
+  function
+  | c :: k :: v :: (_ :: _ as xs) ->
+    assoc ((assoc [c; k; v]) :: xs)
+
+  | [TT.Nil ; k ; v] ->
+    T.map(Types.MalMap.add k v Types.MalMap.empty)
+
+  | [TT.Map(m, meta) ; k ; v] ->
+    TT.Map(Types.MalMap.add k v m, meta)
+  | _ ->
+    T.nil
+
+
+let rec dissoc =
+  function
+  | c :: x :: (_ :: _ as xs) ->
+    dissoc ((dissoc [c; x]) :: xs)
+
+  | [ TT.Map(m, meta) ; k ] ->
+    TT.Map(T.MalMap.remove k m, meta)
+
+  | _ ->
+    T.nil
+
+
+let get =
+  function
+  | [ TT.Nil ; _ ] ->
+    T.nil
+
+  | [ TT.Map(m, _) ; k ] ->
+    begin match T.MalMap.find_opt k m with
+      | Some v ->
+        v
+
+      | None ->
+        T.nil
+    end
+
+  | _ ->
+    raise (Err "Invalid argument for 'get'.")
+
+
+let contains_q =
+  function
+  | [ TT.Map(m, _) ; k ] ->
+    TT.Bool (T.MalMap.mem k m)
+
+  | _ ->
+    raise (Err "Invalid argument for 'contains?'.")
+
+
+let keys =
+  function
+  | [TT.Map(m, _)] ->
+    T.list(T.MalMap.fold (fun k _ ks -> k :: ks) m [])
+
+  | _ ->
+    raise (Err "Invalid argument for 'keys'.")
+
+
+let vals =
+  function
+  | [TT.Map(m, _)] ->
+    T.list(T.MalMap.fold (fun _ v vs -> v :: vs) m [])
+
+  | _ ->
+    raise (Err "Invalid argument for 'vals'.")
+
 
 let init env =
   let set s f =
@@ -291,31 +500,58 @@ let init env =
   set "read-string" read_string ;
   set "slurp" slurp ;
 
-  set "list" T.list ;
+  set "nil?" nil_q ;
+  set "true?" true_q ;
+  set "false?" false_q ;
+  set "string?" string_q ;
+  set "keyword?" keyword_q ;
+  set "symbol?" symbol_q ;
   set "list?" list_q ;
-  set "atom" atom ;
+  set "vector?" vector_q ;
+  set "sequential?" sequential_q ;
+  set "map?" map_q ;
+  set "fn?" fn_q ;
+  set "macro?" macro_q ;
   set "atom?" atom_q ;
+
+  set "=" eq ;
+
+  set "keyword" keyword ;
+  set "symbol" symbol ;
+  set "list" T.list ;
+  set "vector" T.vector ;
+  set "hash-map" T.map_of_list ;
+  set "atom" atom ;
+
+  set "meta" meta ;
+  set "with-meta" with_meta ;
 
   set "deref" deref ;
   set "reset!" reset_b ;
   set "swap!" swap_b ;
 
-  set "=" eq ;
   set "empty?" empty_q ;
+
+  set "first" first ;
+  set "rest" rest ;
   set "count" count ;
+  set "nth" nth ;
 
   set "cons" cons ;
   set "concat" concat ;
 
   set "seq" seq ;
 
-  set "meta" meta ;
-  set "with-meta" with_meta ;
+  set "throw" throw ;
 
-  set "macro?" macro_q ;
+  set "assoc" assoc ;
+  set "dissoc" dissoc ;
+  set "get" get ;
+  set "contains?" contains_q ;
+  set "keys" keys ;
+  set "vals" vals ;
 
-  set "nth" nth ;
-  set "first" first ;
-  set "rest" rest ;
+  set "apply" apply ;
+  set "map" map ;
 
   env

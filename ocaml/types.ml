@@ -34,6 +34,8 @@ type maltype = MalValue.t
 
 exception Err of string
 
+exception MalExn of Types.t
+
 
 let nil = Types.Nil
 let maltrue = Types.Bool true
@@ -259,8 +261,11 @@ and mal_sequnce_equal a b =
   && List.for_all2 mal_equal a b
 
 and mal_map_equal a b =
-  let identical_to_b k v =
-    MalMap.mem k b && mal_equal v (MalMap.find k b)
-  in
   MalMap.cardinal a = MalMap.cardinal b
-  && MalMap.for_all identical_to_b a
+  &&
+  MalMap.for_all
+    (fun k va ->
+       MalMap.mem k b
+       &&
+       mal_equal va (MalMap.find k b))
+    a
