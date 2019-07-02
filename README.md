@@ -6,7 +6,7 @@ My implementation of [Mal](https://github.com/kanaka/mal) (Make-A-Lisp) in [OCam
 
 ## Build
 
-You'll need a working ocaml compiler and [dune](https://dune.build/) for building things, and make, obviously, with python for running the mal project test suite.
+You'll need a working ocaml compiler and [dune](https://dune.build/) for building things, and make, obviously, with python if you want to run the mal project test suite.
 
 *(tested on ocaml 4.07.0 and dune 1.10.0)*
 
