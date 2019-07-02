@@ -80,6 +80,7 @@ and eval_defmacro env =
         let macro = T.set_macro fn in
         E.set sym macro env ;
         macro
+
       | _ ->
         raise (Err "Invalid 'defmacro!' form: must be a function.")
     end
