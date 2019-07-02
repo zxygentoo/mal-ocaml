@@ -95,15 +95,15 @@ and eval_if env =
   function
   | [pred ; then_expr] ->
     if T.to_bool (eval env pred) then
-      (eval env then_expr)
+      eval env then_expr
     else
       T.nil
 
   | [pred ; then_expr ; else_expr] ->
     if T.to_bool (eval env pred) then
-      (eval env then_expr)
+      eval env then_expr
     else
-      (eval env else_expr)
+      eval env else_expr
 
   | _ ->
     raise (Err "Invalid 'if' form.")
