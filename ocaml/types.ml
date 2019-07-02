@@ -176,23 +176,22 @@ let parse_meta =
 
 
 let with_meta value meta =
-  let meta' = parse_meta meta in
   match value with
 
   | Types.Symbol(x, _) ->
-    Types.Symbol(x, meta')
+    Types.Symbol(x, meta)
 
   | Types.List(x, _) ->
-    Types.List(x, meta')
+    Types.List(x, meta)
 
   | Types.Vector(x, _) ->
-    Types.Vector(x, meta')
+    Types.Vector(x, meta)
 
   | Types.Map(x, _) ->
-    Types.Map(x, meta')
+    Types.Map(x, meta)
 
   | Types.Fn(x, _) ->
-    Types.Fn(x, meta')
+    Types.Fn(x, meta)
 
   | _ ->
     raise (Err "Metadata not supported on this type.")

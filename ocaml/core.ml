@@ -170,15 +170,38 @@ let cons =
 
 let seq =
   function
-  | [x] ->
-    T.list (T.list_of_container x)
+  | [TT.Nil]
+
+  | [TT.String ""]
+
+  | [TT.List([], _)]
+
+  | [TT.Vector([], _)] ->
+    T.nil
+
+  | [TT.String s] ->
+    T.list
+      (s
+       |> String.to_seq
+       |> List.of_seq
+       |> List.map (fun v -> T.string (String.make 1 v)))
+
+  | [ TT.List _ as xs ]
+
+  | [ TT.Vector _ as xs ] ->
+    T.list (T.list_of_container xs)
+
   | _ ->
     raise (Err "Invalid argument for 'seq'.")
 
 
 let rec concat = 
   function
-  | [] ->
+  | []
+
+  | [TT.List([], _)]
+
+  | [TT.Vector([], _)] ->
     T.empty_list
 
   | [x] as v when T.is_container x ->
@@ -325,6 +348,15 @@ let false_q =
     T.malfalse
 
 
+let number_q =
+  function
+  | [TT.Int _ ] ->
+    T.maltrue
+
+  | _ ->
+    T.malfalse
+
+
 let string_q =
   function
   | [TT.String _] ->
@@ -383,8 +415,8 @@ let map_q =
 
 let fn_q =
   function
-  | [TT.Fn _] ->
-    T.maltrue
+  | [ TT.Fn _ as fn ] ->
+    TT.Bool (not (T.is_macro fn))
 
   | _ ->
     T.malfalse
@@ -479,6 +511,43 @@ let vals =
     raise (Err "Invalid argument for 'vals'.")
 
 
+let readline =
+  function
+  | [TT.String x] ->
+    print_string x;
+    T.string (read_line ())
+
+  | _ ->
+    T.string (read_line ())
+
+
+let time_ms =
+  function
+  | [] ->
+    TT.Int (truncate (1000.0 *. Unix.gettimeofday ()))
+
+  | _ ->
+    raise (Err "Invalid argument for 'time-ms'.")
+
+
+let rec conj =
+  function
+  | c :: x :: (_ :: _ as xs) ->
+    conj ((conj [c; x]) :: xs)
+
+  | [ TT.Map(m, meta) ; TT.Vector([k ; v], _) ]
+    -> TT.Map(T.MalMap.add k v m, meta)
+
+  | [ TT.List(v, meta) ; x ]
+    -> TT.List(x :: v, meta)
+
+  | [ TT.Vector(v, meta) ; x ]
+    -> TT.Vector(v @ [x], meta)
+
+  | _ ->
+    T.nil
+
+
 let init env =
   let set s f =
     E.set s (T.fn f) env in
@@ -503,6 +572,7 @@ let init env =
   set "nil?" nil_q ;
   set "true?" true_q ;
   set "false?" false_q ;
+  set "number?" number_q ;
   set "string?" string_q ;
   set "keyword?" keyword_q ;
   set "symbol?" symbol_q ;
@@ -554,4 +624,7 @@ let init env =
   set "apply" apply ;
   set "map" map ;
 
+  set "readline" readline ;
+  set "time-ms" time_ms ;
+  set "conj" conj ;
   env
