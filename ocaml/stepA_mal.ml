@@ -342,7 +342,7 @@ let add_mal_defs repl_env =
   re repl_env or_def |> ignore
 
 
-let run_cmd repl_env =
+let run_file repl_env =
   try
     re repl_env ("(load-file \"" ^ Sys.argv.(1) ^ "\")") |> ignore
   with
@@ -382,6 +382,6 @@ let main =
   let repl_env = Core.init (E.root ()) in
   add_mal_defs repl_env ;
   if Array.length Sys.argv > 1 then
-    run_cmd repl_env    
+    run_file repl_env    
   else
     run_repl repl_env
