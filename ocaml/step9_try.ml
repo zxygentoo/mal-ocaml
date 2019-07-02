@@ -343,7 +343,11 @@ let main =
     | Types.MalExn exc ->
       print_endline
         ("Exception: " ^ (Printer.string_of_maltype true exc) ^ "\n")
-  else
+
+    | End_of_file ->
+      ()
+
+  else begin
     try
       while true do
         print_string "user> " ;
@@ -363,3 +367,4 @@ let main =
     with
     | End_of_file ->
       ()
+  end

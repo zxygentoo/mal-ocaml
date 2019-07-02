@@ -317,6 +317,7 @@ let host_lang = "OCaml"
 (* REPL entry *)
 
 let main =
+
   let repl_env = Core.init (E.root ()) in
 
   E.set "*host-language*" (T.string host_lang) repl_env ;
@@ -346,30 +347,37 @@ let main =
   re repl_env or_def |> ignore ;
 
   if Array.length Sys.argv > 1 then
-    try
-      re repl_env ("(load-file \"" ^ Sys.argv.(1) ^ "\")") |> ignore
-    with
-    | Types.MalExn exc ->
-      print_endline
-        ("Exception: " ^ (Printer.string_of_maltype true exc) ^ "\n")
-  else
-    re repl_env "(println (str \"Mal [\" *host-language* \"]\"))" |> ignore ;
-  try
-    while true do
-      print_string "user> " ;
+    begin
       try
-        rep repl_env (read_line ()) ;
-      with 
-      | Reader.Nothing ->
-        ()
-
-      | T.MalExn exc ->
+        re repl_env ("(load-file \"" ^ Sys.argv.(1) ^ "\")") |> ignore
+      with
+      | Types.MalExn exc ->
         print_endline
-          ("Exception: " ^ (Printer.string_of_maltype true exc))
+          ("Exception: " ^ (Printer.string_of_maltype true exc) ^ "\n")
 
-      | T.Err msg | Reader.Err msg | Core.Err msg | Err msg ->
-        print_err msg
-    done
-  with
-  | End_of_file ->
-    ()
+      | End_of_file ->
+        ()
+    end
+  else
+    begin
+      re repl_env "(println (str \"Mal [\" *host-language* \"]\"))" |> ignore ;
+      try
+        while true do
+          print_string "user> " ;
+          try
+            rep repl_env (read_line ()) ;
+          with
+          | Reader.Nothing ->
+            ()
+
+          | T.MalExn exc ->
+            print_endline
+              ("Exception: " ^ (Printer.string_of_maltype true exc))
+
+          | T.Err msg | Reader.Err msg | Core.Err msg | Err msg ->
+            print_err msg
+        done
+      with
+      | End_of_file ->
+        ()
+    end
