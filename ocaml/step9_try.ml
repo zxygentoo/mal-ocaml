@@ -259,7 +259,7 @@ and eval_ast env =
 
       | None ->
         (* raise (Err ("Symbol '" ^ x ^ "' not found.")) *)
-        (* mal test will fail for above msg *)
+        (* mal test will fail on above msg *)
         raise (Err ("'" ^ x ^ "' not found"))
     end
 
