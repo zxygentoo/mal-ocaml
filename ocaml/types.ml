@@ -247,7 +247,7 @@ let rec mal_equal a b =
   | Types.List(x, _), Types.Vector(y, _)
   | Types.Vector(x, _), Types.Vector(y, _)
   | Types.Vector(x, _), Types.List(y, _) ->
-    mal_sequnce_equal x y
+    mal_sequence_equal x y
 
   | Types.Map(x, _), Types.Map(y, _) ->
     mal_map_equal x y
@@ -255,7 +255,7 @@ let rec mal_equal a b =
   | _ ->
     a = b
 
-and mal_sequnce_equal a b =
+and mal_sequence_equal a b =
   List.length a = List.length b
   && List.for_all2 mal_equal a b
 
