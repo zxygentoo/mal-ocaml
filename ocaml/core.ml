@@ -535,14 +535,14 @@ let rec conj =
   | c :: x :: (_ :: _ as xs) ->
     conj ((conj [c; x]) :: xs)
 
-  | [ TT.Map(m, meta) ; TT.Vector([k ; v], _) ]
-    -> TT.Map(T.MalMap.add k v m, meta)
+  | [ TT.Map(m, meta) ; TT.Vector([k ; v], _) ] ->
+    TT.Map(T.MalMap.add k v m, meta)
 
-  | [ TT.List(v, meta) ; x ]
-    -> TT.List(x :: v, meta)
+  | [ TT.List(v, meta) ; x ] ->
+    TT.List(x :: v, meta)
 
-  | [ TT.Vector(v, meta) ; x ]
-    -> TT.Vector(v @ [x], meta)
+  | [ TT.Vector(v, meta) ; x ] ->
+    TT.Vector(v @ [x], meta)
 
   | _ ->
     T.nil
@@ -600,8 +600,9 @@ let init env =
   set "reset!" reset_b ;
   set "swap!" swap_b ;
 
-  set "empty?" empty_q ;
+  set "seq" seq ;
 
+  set "empty?" empty_q ;
   set "first" first ;
   set "rest" rest ;
   set "count" count ;
@@ -609,8 +610,6 @@ let init env =
 
   set "cons" cons ;
   set "concat" concat ;
-
-  set "seq" seq ;
 
   set "throw" throw ;
 
@@ -621,10 +620,11 @@ let init env =
   set "keys" keys ;
   set "vals" vals ;
 
-  set "apply" apply ;
   set "map" map ;
+  set "apply" apply ;
 
   set "readline" readline ;
   set "time-ms" time_ms ;
   set "conj" conj ;
+
   env
