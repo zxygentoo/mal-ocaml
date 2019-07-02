@@ -258,12 +258,8 @@ let rest =
 
 let count =
   function
-  | [ TT.List(v, _) ]
-  | [ TT.Vector(v, _) ] ->
-    T.int (List.length v)
-
-  | _ ->
-    T.int 0
+  | [ TT.List(v, _) ] | [ TT.Vector(v, _) ] -> T.int (List.length v)
+  | _ -> T.int 0
 
 
 let nth =
@@ -271,11 +267,8 @@ let nth =
   | [ TT.List(xs, _) ; TT.Int i ]
   | [ TT.Vector(xs, _) ; TT.Int i ] ->
     begin match List.nth_opt xs i with
-      | Some v ->
-        v
-
-      | None ->
-        raise (Err "Index out of range.")
+      | Some v -> v
+      | None -> raise (Err "Index out of range.")
     end
 
   | _ ->
@@ -428,6 +421,7 @@ let apply =
         f ((List.rev rev_args) @ (T.list_of_container last_arg))
       | [] -> f []
     end
+
   | _ ->
     raise (Err "'apply' takes a function as first argument.")
 
