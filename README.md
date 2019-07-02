@@ -28,4 +28,4 @@ ocaml/_build/default/stepA_mal.exe examples/hello.mal
 
 ## License
 
-Mal (make-a-lisp) is created by Joel Martin and licensed under the MPL 2.0 (Mozilla Public License 2.0). See LICENSE.txt for more details.
+Mal (make-a-lisp) is created by Joel Martin and licensed under the MPL 2.0 (Mozilla Public License 2.0). See LICENSE for more details.
