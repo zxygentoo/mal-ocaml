@@ -1,6 +1,6 @@
 # mal-ocaml
 
-My implementation of [Mal](https://github.com/kanaka/mal) (Make-A-Lisp) in OCaml.
+My implementation of [Mal](https://github.com/kanaka/mal) (Make-A-Lisp) in [OCaml](https://ocaml.org/).
 
 [Make-A-Lisp Guide](https://github.com/kanaka/mal/blob/master/process/guide.md)
 
