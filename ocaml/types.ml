@@ -29,52 +29,28 @@ and MalMap
   = Map.Make(MalValue)
 
 
-type maltype = MalValue.t
-
-
 exception Err of string
 
 exception MalExn of Types.t
 
 
 let nil = Types.Nil
-let maltrue = Types.Bool true
+
+let maltrue  = Types.Bool true
 let malfalse = Types.Bool false
 
 
-let int x =
-  Types.Int x
-
-
-let string x =
-  Types.String x
-
-
-let keyword x =
-  Types.Keyword x
-
-
-let symbol x = 
-  Types.Symbol(x, nil)
-
-
-let list x = 
-  Types.List(x, nil)
-
+let int x     = Types.Int x
+let string x  = Types.String x
+let keyword x = Types.Keyword x
+let symbol x  = Types.Symbol(x, nil)
+let list x    = Types.List(x, nil)
+let vector x  = Types.Vector(x, nil)
+let map x     = Types.Map(x, nil)
+let fn x      = Types.Fn(x, nil)
+let atom x    = Types.Atom (ref x)
 
 let empty_list = list []
-
-
-let vector x = 
-  Types.Vector(x, nil)
-
-
-(* let empty_vector = vector [] *)
-
-
-let map x =
-  Types.Map(x, nil)
-
 
 let map_of_list x =
   let rec aux acc x =
@@ -91,26 +67,7 @@ let map_of_list x =
   aux MalMap.empty x
 
 
-let fn x = 
-  Types.Fn(x, nil)
-
-
-let atom x =
-  Types.Atom (ref x)
-
-
-let is_container =
-  function
-  | Types.List _
-
-  | Types.Vector _
-
-  | Types.Map _ ->
-    true
-
-  | _ ->
-    false
-
+(* truthiness *)
 
 let to_bool =
   function
@@ -119,10 +76,22 @@ let to_bool =
   | _ -> true
 
 
+(* container types (list/vector/map) helpers *)
+
+let is_container =
+  function
+  | Types.List _
+  | Types.Vector _
+  | Types.Map _ ->
+    true
+
+  | _ ->
+    false
+
+
 let list_of_container =
   function
   | Types.List(xs, _)
-
   | Types.Vector(xs, _) ->
     xs
 
@@ -130,26 +99,24 @@ let list_of_container =
     MalMap.fold (fun k v m -> vector [ k ; v ] :: m) xs [] |> List.rev
 
   | _ ->
-    raise (Err "Invalid argument for 'list_of_container': not a list/vector/map.")
+    raise (Err "Not a container type.")
 
 
 let concat_containers a b =
   if is_container a && is_container b then
     list((list_of_container a) @ (list_of_container b))
   else
-    raise (Err "Invalid argument for '( @ )': can only concat two sequnences.")
+    raise (Err "Can only concat two conatiner types.")
 
+
+(* meta *)
 
 let meta =
   function
   | Types.Symbol(_, meta)
-
   | Types.List(_, meta)
-
   | Types.Vector(_, meta)
-
   | Types.Map(_, meta)
-
   | Types.Fn(_, meta) ->
     meta
 
@@ -157,27 +124,8 @@ let meta =
     raise (Err "Metadata not supported on this type.")
 
 
-(* Mal guides doesn't specify these details, so we do what Clojure does. *)
-let parse_meta =
+let with_meta meta =
   function
-  | Types.Symbol(s, _)
-
-  | Types.String s ->
-    map_of_list [ keyword "tag" ; string s ]
-
-  | Types.Keyword kw ->
-    map_of_list [ keyword kw ; maltrue ]
-
-  | Types.Map(m, _) ->
-    map m
-
-  | _ ->
-    raise (Err "Metadata must be a symbol, keyword, string or map.")
-
-
-let with_meta value meta =
-  match value with
-
   | Types.Symbol(x, _) ->
     Types.Symbol(x, meta)
 
@@ -197,9 +145,12 @@ let with_meta value meta =
     raise (Err "Metadata not supported on this type.")
 
 
+(* macro *)
+
 let macro_kw = keyword "macro"
 
 
+(* This is not really `set`, we just create a new fn with different meta. *)
 let set_macro =
   function
   | Types.Fn(x, meta) ->
@@ -226,20 +177,7 @@ let is_macro =
     false
 
 
-let can_be_meta =
-  function
-  | Types.Symbol _
-
-  | Types.String _
-
-  | Types.Keyword _
-
-  | Types.Map _ ->
-    true
-
-  | _ ->
-    false
-
+(* equality *)
 
 let rec mal_equal a b =
   match a, b with
