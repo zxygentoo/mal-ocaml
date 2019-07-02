@@ -25,18 +25,12 @@ let rec find k env =
 
   | None ->
     begin match env.outer with
-      | None ->
-        None
-
-      | Some outer ->
-        find k outer
+      | None -> None
+      | Some outer -> find k outer
     end
 
 
 let get k env =
   match find k env with
-  | Some env ->
-    M.find_opt k !(env.current)
-
-  | None ->
-    None
+  | Some env -> M.find_opt k !(env.current)
+  | None -> None
