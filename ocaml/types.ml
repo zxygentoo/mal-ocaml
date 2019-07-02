@@ -162,8 +162,11 @@ let set_macro =
         Types.Fn(x, map(MalMap.add macro_kw maltrue MalMap.empty))
 
       | _ ->
-        raise (Err "to set macro, meta must be a map/nil.")
+        (* Clojure requires meta to be a map, Mal doesn't.
+           But this doesn't effect passing tests and self-hosting. *)
+        raise (Err "Meta must be a map/nil for set as macro.")
     end
+
   | _ ->
     raise (Err "Macro must be a function.")
 
