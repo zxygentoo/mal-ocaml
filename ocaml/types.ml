@@ -1,3 +1,18 @@
+(* This type definition is a bit awkward.
+   The way OCaml use functor to construct Map module and the fact
+   module is kinda second class in the language resulting this some what
+   complex thing.
+
+   Sure we can use a map from string -> malvalue_type to models this,
+   as a matter of fact some implementations in the mal repo do. But that's
+   kinda ugly too.
+
+   Current definition will expose two modules for types: Types and Types.Types,
+   Types for the MalMap and general type related functions,
+   Types.Types for actual value constructors.
+
+   This isn't the prettiest, but still managable. *)
+
 module rec Types
   : sig
     type t =
@@ -34,11 +49,12 @@ exception Err of string
 exception MalExn of Types.t
 
 
+(* value construction shortcuts *)
+
 let nil = Types.Nil
 
 let maltrue  = Types.Bool true
 let malfalse = Types.Bool false
-
 
 let int x     = Types.Int x
 let string x  = Types.String x
@@ -51,6 +67,7 @@ let fn x      = Types.Fn(x, nil)
 let atom x    = Types.Atom (ref x)
 
 let empty_list = list []
+
 
 let map_of_list x =
   let rec aux acc x =
@@ -71,28 +88,21 @@ let map_of_list x =
 
 let to_bool =
   function
-  | Types.Nil
-  | Types.Bool(false) -> false
+  | Types.Nil | Types.Bool(false) -> false
   | _ -> true
 
 
-(* container types (list/vector/map) helpers *)
+(* container type (list/vector/map) helpers *)
 
 let is_container =
   function
-  | Types.List _
-  | Types.Vector _
-  | Types.Map _ ->
-    true
-
-  | _ ->
-    false
+  | Types.List _ | Types.Vector _ | Types.Map _ -> true
+  | _ -> false
 
 
 let list_of_container =
   function
-  | Types.List(xs, _)
-  | Types.Vector(xs, _) ->
+  | Types.List(xs, _) | Types.Vector(xs, _) ->
     xs
 
   | Types.Map(xs, _) ->
@@ -150,7 +160,9 @@ let with_meta meta =
 let macro_kw = keyword "macro"
 
 
-(* This is not really `set`, we just create a new fn with different meta. *)
+(* This is not really `set`, we just create a new mal function
+   with the same native ocaml function with different metadata. *)
+
 let set_macro =
   function
   | Types.Fn(x, meta) ->
@@ -162,7 +174,8 @@ let set_macro =
         Types.Fn(x, map(MalMap.add macro_kw maltrue MalMap.empty))
 
       | _ ->
-        (* Clojure requires meta to be a map, Mal doesn't.
+        (* If meta of fn is not nil/map, this will fail.
+           Clojure requires meta to be a map, Mal doesn't.
            But this doesn't effect passing tests and self-hosting. *)
         raise (Err "Meta must be a map/nil for set as macro.")
     end
@@ -184,8 +197,8 @@ let is_macro =
 
 let rec mal_equal a b =
   match a, b with
-  | Types.List(x, _), Types.List(y, _)
-  | Types.List(x, _), Types.Vector(y, _)
+  | Types.List(x, _),   Types.List(y, _)
+  | Types.List(x, _),   Types.Vector(y, _)
   | Types.Vector(x, _), Types.Vector(y, _)
   | Types.Vector(x, _), Types.List(y, _) ->
     mal_sequence_equal x y
