@@ -58,6 +58,16 @@ let slurp =
   | _ -> raise (Err "'slurp' only takes one argument of string.")
 
 
+let readline =
+  function
+  | [TT.String x] ->
+    print_string x;
+    T.string (read_line ())
+
+  | _ ->
+    T.string (read_line ())
+
+
 let nil_q =
   function
   | [TT.Nil] -> T.maltrue
@@ -428,16 +438,6 @@ let throw =
   | _ -> raise (Err "'throw' only takes one argument.")
 
 
-let readline =
-  function
-  | [TT.String x] ->
-    print_string x;
-    T.string (read_line ())
-
-  | _ ->
-    T.string (read_line ())
-
-
 let time_ms =
   function
   | [] -> TT.Int (truncate (1000.0 *. Unix.gettimeofday ()))
@@ -456,6 +456,7 @@ let init env =
   set "println" println ;
   set "read-string" read_string ;
   set "slurp" slurp ;
+  set "readline" readline ;
 
   (* type predicates *)
 
@@ -542,7 +543,6 @@ let init env =
 
   (* misc *)
 
-  set "readline" readline ;
   set "time-ms" time_ms ;
 
   env
