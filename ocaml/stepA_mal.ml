@@ -304,6 +304,7 @@ let print_err msg =
 
 (* mal definitions *)
 
+let host_lang = "OCaml"
 let not_def = "(def! not (fn* (a) (if a false true)))"
 let load_file_def = "(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))"
 let cond_def = "(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"
@@ -312,14 +313,9 @@ let gensym_def = "(def! gensym (let* [counter (atom 0)] (fn* [] (symbol (str \"G
 let or_def = "(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))"
 
 
-let host_lang = "OCaml"
+(* so main won't look too messy... *)
 
-(* REPL entry *)
-
-let main =
-
-  let repl_env = Core.init (E.root ()) in
-
+let add_mal_defs repl_env =
   E.set "*host-language*" (T.string host_lang) repl_env ;
 
   E.set "*ARGV*"
@@ -333,10 +329,9 @@ let main =
     repl_env ;
 
   E.set "eval"
-    (T.fn(
-        function
-        | [ast] -> eval repl_env ast
-        | _ -> raise (Core.Err "Invalid arguments for 'eval'.")))
+    (T.fn(function
+         | [ast] -> eval repl_env ast
+         | _ -> raise (Core.Err "Invalid arguments for 'eval'.")))
     repl_env ;
 
   re repl_env not_def |> ignore ;
@@ -344,40 +339,49 @@ let main =
   re repl_env cond_def |> ignore ;
   re repl_env inc_def |> ignore ;
   re repl_env gensym_def |> ignore ;
-  re repl_env or_def |> ignore ;
+  re repl_env or_def |> ignore
 
-  if Array.length Sys.argv > 1 then
-    begin
+
+let run_cmd repl_env =
+  try
+    re repl_env ("(load-file \"" ^ Sys.argv.(1) ^ "\")") |> ignore
+  with
+  | Types.MalExn e ->
+    print_endline ("Exception: " ^ (Printer.string_of_maltype true e) ^ "\n")
+
+  | End_of_file ->
+    ()
+
+
+let run_repl repl_env =
+  re repl_env "(println (str \"Mal [\" *host-language* \"]\"))" |> ignore ;
+  try
+    while true do
+      print_string "user> " ;
       try
-        re repl_env ("(load-file \"" ^ Sys.argv.(1) ^ "\")") |> ignore
+        rep repl_env (read_line ()) ;
       with
-      | Types.MalExn exc ->
+      | Reader.Nothing ->
+        ()
+
+      | T.MalExn exc ->
         print_endline
-          ("Exception: " ^ (Printer.string_of_maltype true exc) ^ "\n")
+          ("Exception: " ^ (Printer.string_of_maltype true exc))
 
-      | End_of_file ->
-        ()
-    end
+      | T.Err msg | Reader.Err msg | Core.Err msg | Err msg ->
+        print_err msg
+    done
+  with
+  | End_of_file ->
+    ()
+
+
+(* REPL entry *)
+
+let main =
+  let repl_env = Core.init (E.root ()) in
+  add_mal_defs repl_env ;
+  if Array.length Sys.argv > 1 then
+    run_cmd repl_env    
   else
-    begin
-      re repl_env "(println (str \"Mal [\" *host-language* \"]\"))" |> ignore ;
-      try
-        while true do
-          print_string "user> " ;
-          try
-            rep repl_env (read_line ()) ;
-          with
-          | Reader.Nothing ->
-            ()
-
-          | T.MalExn exc ->
-            print_endline
-              ("Exception: " ^ (Printer.string_of_maltype true exc))
-
-          | T.Err msg | Reader.Err msg | Core.Err msg | Err msg ->
-            print_err msg
-        done
-      with
-      | End_of_file ->
-        ()
-    end
+    run_repl repl_env
