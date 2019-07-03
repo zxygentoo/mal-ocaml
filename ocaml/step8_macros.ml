@@ -120,17 +120,17 @@ and eval_do env =
 
 and eval_if env =
   function
-  | [pred ; then_expr] ->
+  | [pred ; then_] ->
     if T.to_bool (eval env pred) then
-      eval env then_expr
+      eval env then_
     else
       T.nil
 
-  | [pred ; then_expr ; else_expr] ->
+  | [pred ; then_ ; else_] ->
     if T.to_bool (eval env pred) then
-      eval env then_expr
+      eval env then_
     else
-      eval env else_expr
+      eval env else_
 
   | _ ->
     raise (Err "Invalid 'if' form.")
