@@ -331,7 +331,7 @@ let add_mal_defs repl_env =
   E.set "eval"
     (T.fn(function
          | [ast] -> eval repl_env ast
-         | _ -> raise (Core.Err "Invalid arguments for 'eval'.")))
+         | _ -> raise (Core.Err "'eval' takes only one argument.")))
     repl_env ;
 
   re repl_env not_def |> ignore ;
