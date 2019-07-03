@@ -26,6 +26,13 @@ make ocaml
 make "clean^ocaml"
 ```
 
+### Run mal test suite
+
+```bash
+make "test^ocaml"
+make MAL_IMPL=ocaml "test^mal"
+```
+
 ## Run mal-ocaml REPL
 
 ```bash
