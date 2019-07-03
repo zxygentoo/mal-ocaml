@@ -30,7 +30,7 @@ make "clean^ocaml"
 
 ```bash
 make "test^ocaml"
-make MAL_IMPL=ocaml "test^mal"
+make MAL_IMPL=ocaml "test^mal"      # self-hosting tests
 ```
 
 ## Run mal-ocaml REPL
