@@ -313,8 +313,6 @@ let gensym_def = "(def! gensym (let* [counter (atom 0)] (fn* [] (symbol (str \"G
 let or_def = "(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))"
 
 
-(* so main won't look too messy... *)
-
 let add_mal_defs repl_env =
   E.set "*host-language*" (T.string host_lang) repl_env ;
 
