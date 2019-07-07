@@ -15,7 +15,6 @@ STEP_BINS = $(STEPS:%.ml=%)
 all :
 	dune build @all
 
-
 $(STEP_BINS) :
 	dune build $@.exe
 

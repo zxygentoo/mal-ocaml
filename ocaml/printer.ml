@@ -38,7 +38,8 @@ let rec string_of_maltype print_readably exp =
           s ^ (if s = "" then "" else " ") ^
           (string_of_maltype r k) ^ " " ^ (string_of_maltype r v))
        v
-       "") ^ "}"
+       "") ^
+    "}"
 
   | T.Fn(_, _) ->
     "#<function>"
