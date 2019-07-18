@@ -88,7 +88,7 @@ and eval_defmacro env =
     end
 
   | _ ->
-    raise (Err "Invalid 'def!' form.")
+    raise (Err "Invalid 'defmacro!' form.")
 
 and eval_let env =
   function

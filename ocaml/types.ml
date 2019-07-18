@@ -163,7 +163,6 @@ let macro_kw = keyword "macro"
 
 (* This is not really `set`, we just create a new mal function
    with the same native ocaml function with different metadata. *)
-
 let set_macro =
   function
   | Types.Fn(x, meta) ->
@@ -211,15 +210,11 @@ let rec mal_equal a b =
     a = b
 
 and mal_sequence_equal a b =
-  List.length a = List.length b
-  && List.for_all2 mal_equal a b
+  List.length a = List.length b && List.for_all2 mal_equal a b
 
 and mal_map_equal a b =
   MalMap.cardinal a = MalMap.cardinal b
   &&
   MalMap.for_all
-    (fun k va ->
-       MalMap.mem k b
-       &&
-       mal_equal va (MalMap.find k b))
+    (fun k va -> MalMap.mem k b && mal_equal va (MalMap.find k b))
     a
