@@ -93,7 +93,6 @@ and eval_defmacro env =
 and eval_let env =
   function
   | [ TT.List(bindings, _) ; body ]
-
   | [ TT.Vector(bindings, _) ; body ] ->
     eval
       (make_let_env (E.make (Some env)) bindings)
@@ -140,7 +139,6 @@ and eval_if env =
 and eval_fn env =
   function
   | [TT.List(arg_syms, _) ; body]
-
   | [TT.Vector(arg_syms, _) ; body] ->
     T.fn(
       fun args ->
@@ -186,12 +184,10 @@ and eval_quasiquote env =
 and quasiquote =
   function
   | TT.List([ TT.Symbol("unquote", _) ; ast ], _)
-
   | TT.Vector([ TT.Symbol("unquote", _) ; ast ], _) ->
     ast
 
   | TT.List(TT.List([ TT.Symbol("splice-unquote", _) ; x ], _) :: xs, _)
-
   | TT.Vector(TT.List([ TT.Symbol("splice-unquote", _) ; x ], _) :: xs, _) ->
     T.list [T.symbol "concat" ; x ; quasiquote (T.list xs)]
 
