@@ -1,19 +1,3 @@
-(* This type definition is a bit awkward.
-
-   This some what complex thing is the combination of
-   the way OCaml use functor to construct Map module and the fact
-   module is kind of second-class in the language.
-
-   Sure we can use a map from string to malvalue_type to models this,
-   as a matter of fact some implementations in the mal repo do, or maybe
-   use some other tricks. but that's kinda ugly too.
-
-   Current definition will expose two modules for types:
-   Types for the MalMap and general type related functions,
-   and Types.Types for actual value constructors.
-
-   This isn't the prettiest, but still manageable. *)
-
 module rec Types
   : sig
     type t =
@@ -44,6 +28,8 @@ and MalMap
   : Map.S with type key = MalValue.t
   = Map.Make(MalValue)
 
+
+include Types
 
 exception Err of string
 

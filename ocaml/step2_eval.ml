@@ -1,6 +1,5 @@
 module E = Env
 module T = Types
-module TT = Types.Types
 
 
 exception Err of string
@@ -12,7 +11,7 @@ let read str =
 
 let rec eval env ast =
   match eval_ast env ast with
-  | TT.List(TT.Fn(f, _) :: args, _) ->
+  | T.List(T.Fn(f, _) :: args, _) ->
     f args
 
   | _ as result ->
@@ -20,7 +19,7 @@ let rec eval env ast =
 
 and eval_ast env ast =
   match ast with
-  | TT.Symbol(x, _) ->
+  | T.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->
         v
@@ -29,13 +28,13 @@ and eval_ast env ast =
         raise (Err ("can't find symbol '" ^ x ^ "'."))
     end
 
-  | TT.List(xs, _) ->
+  | T.List(xs, _) ->
     T.list(List.map (eval env) xs)
 
-  | TT.Vector(xs, _) ->
+  | T.Vector(xs, _) ->
     T.vector(List.map (eval env) xs)
 
-  | TT.Map(xs, _) ->
+  | T.Map(xs, _) ->
     T.map(
       T.MalMap.fold
         (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
@@ -55,8 +54,8 @@ let rep str =
   let arith_fn f =
     T.fn(
       function
-      | [TT.Int(a) ; TT.Int(b)] ->
-        TT.Int(f a b)
+      | [T.Int(a) ; T.Int(b)] ->
+        T.Int(f a b)
 
       | _ ->
         raise (Err "Arithmetic functions require two int arguments.")

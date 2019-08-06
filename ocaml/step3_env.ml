@@ -1,6 +1,5 @@
 module E = Env
 module T = Types
-module TT = Types.Types
 
 
 exception Err of string
@@ -12,10 +11,10 @@ let read str =
 
 let rec eval env ast =
   match ast with
-  | TT.List([], _) ->
+  | T.List([], _) ->
     ast
 
-  | TT.List(TT.Symbol(sym, _) :: expr, _) ->
+  | T.List(T.Symbol(sym, _) :: expr, _) ->
     begin match sym with
       | "def!" ->
         eval_def env expr
@@ -32,7 +31,7 @@ let rec eval env ast =
 
 and eval_def env =
   function
-  | [TT.Symbol(sym, _) ; expr] ->
+  | [T.Symbol(sym, _) ; expr] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -42,13 +41,13 @@ and eval_def env =
 
 and eval_let env =
   function
-  | [TT.List(bindings, _) ; body]
+  | [T.List(bindings, _) ; body]
 
-  | [TT.Vector(bindings, _) ; body] ->
+  | [T.Vector(bindings, _) ; body] ->
     let let_env = E.make (Some env) in
     let rec eval_let_bindings =
       function
-      | TT.Symbol(k, _) :: expr :: rest ->
+      | T.Symbol(k, _) :: expr :: rest ->
         E.set k (eval let_env expr) let_env ;
         eval_let_bindings rest
 
@@ -69,7 +68,7 @@ and eval_let env =
 
 and apply_fn env ast =
   match eval_ast env ast with
-  | TT.List(TT.Fn(f, _) :: args, _) ->
+  | T.List(T.Fn(f, _) :: args, _) ->
     f args
 
   | _ ->
@@ -77,7 +76,7 @@ and apply_fn env ast =
 
 and eval_ast env =
   function
-  | TT.Symbol(x, _) ->
+  | T.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->
         v
@@ -86,13 +85,13 @@ and eval_ast env =
         raise (Err ("Symbol '" ^ x ^ "' not found."))
     end
 
-  | TT.List(xs, _) ->
+  | T.List(xs, _) ->
     T.list(List.map (eval env) xs)
 
-  | TT.Vector(xs, _) ->
+  | T.Vector(xs, _) ->
     T.vector(List.map (eval env) xs)
 
-  | TT.Map(xs, _) ->
+  | T.Map(xs, _) ->
     T.map(
       T.MalMap.fold
         (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
@@ -112,8 +111,8 @@ let repl_env =
   let arith_fn f =
     T.fn(
       function
-      | [TT.Int(a) ; TT.Int(b)] ->
-        TT.Int(f a b)
+      | [T.Int(a) ; T.Int(b)] ->
+        T.Int(f a b)
 
       | _ ->
         raise (Err "Arithmetic functions require two int arguments.")

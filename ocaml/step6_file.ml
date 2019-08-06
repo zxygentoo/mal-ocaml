@@ -1,6 +1,5 @@
 module E = Env
 module T = Types
-module TT = Types.Types
 
 
 exception Err of string
@@ -12,25 +11,25 @@ let read str =
 
 let rec eval env ast =
   match ast with
-  | TT.List([], _) ->
+  | T.List([], _) ->
     ast
 
-  | TT.List(TT.Symbol("def!", _) :: expr, _) ->
+  | T.List(T.Symbol("def!", _) :: expr, _) ->
     eval_def env expr
 
-  | TT.List(TT.Symbol("let*", _) :: expr, _) ->
+  | T.List(T.Symbol("let*", _) :: expr, _) ->
     eval_let env expr
 
-  | TT.List(TT.Symbol("do", _) :: expr, _) ->
+  | T.List(T.Symbol("do", _) :: expr, _) ->
     eval_do env expr
 
-  | TT.List(TT.Symbol("if", _) :: expr, _) ->
+  | T.List(T.Symbol("if", _) :: expr, _) ->
     eval_if env expr
 
-  | TT.List(TT.Symbol("fn*", _) :: expr, _) ->
+  | T.List(T.Symbol("fn*", _) :: expr, _) ->
     eval_fn env expr
 
-  | TT.List(_, _) ->
+  | T.List(_, _) ->
     apply_fn env ast
 
   | _  ->
@@ -38,7 +37,7 @@ let rec eval env ast =
 
 and eval_def env =
   function
-  | [TT.Symbol(sym, _) ; expr] ->
+  | [T.Symbol(sym, _) ; expr] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -48,9 +47,9 @@ and eval_def env =
 
 and eval_let env =
   function
-  | [TT.List(bindings, _) ; body]
+  | [T.List(bindings, _) ; body]
 
-  | [TT.Vector(bindings, _) ; body] ->
+  | [T.Vector(bindings, _) ; body] ->
     eval
       (make_let_env (E.make (Some env)) bindings)
       body
@@ -60,7 +59,7 @@ and eval_let env =
 
 and make_let_env let_env =
   function
-  | TT.Symbol(k, _) :: v :: bindings_left ->
+  | T.Symbol(k, _) :: v :: bindings_left ->
     E.set k (eval let_env v) let_env ;
     make_let_env let_env bindings_left
 
@@ -104,9 +103,9 @@ and eval_if env =
 
 and eval_fn env =
   function
-  | [TT.List(arg_syms, _) ; body]
+  | [T.List(arg_syms, _) ; body]
 
-  | [TT.Vector(arg_syms, _) ; body] ->
+  | [T.Vector(arg_syms, _) ; body] ->
     T.fn(
       fun args ->
         eval
@@ -118,11 +117,11 @@ and eval_fn env =
 
 and make_fn_env fn_env arg_syms args =
   match (arg_syms, args) with
-  | [TT.Symbol("&", _) ; TT.Symbol(k, _)], vs ->
+  | [T.Symbol("&", _) ; T.Symbol(k, _)], vs ->
     E.set k (T.list vs) fn_env ;
     fn_env
 
-  | TT.Symbol(k, _) :: syms, v :: vs ->
+  | T.Symbol(k, _) :: syms, v :: vs ->
     E.set k v fn_env ;
     make_fn_env fn_env syms vs
 
@@ -134,7 +133,7 @@ and make_fn_env fn_env arg_syms args =
 
 and apply_fn env ast =
   match eval_ast env ast with
-  | TT.List(TT.Fn(f, _) :: args, _) ->
+  | T.List(T.Fn(f, _) :: args, _) ->
     f args
 
   | _ ->
@@ -142,7 +141,7 @@ and apply_fn env ast =
 
 and eval_ast env =
   function
-  | TT.Symbol(x, _) ->
+  | T.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->
         v
@@ -151,13 +150,13 @@ and eval_ast env =
         raise (Err ("Symbol '" ^ x ^ "' not found."))
     end
 
-  | TT.List(xs, _) ->
+  | T.List(xs, _) ->
     T.list(List.map (eval env) xs)
 
-  | TT.Vector(xs, _) ->
+  | T.Vector(xs, _) ->
     T.vector(List.map (eval env) xs)
 
-  | TT.Map(xs, _) ->
+  | T.Map(xs, _) ->
     T.map(
       T.MalMap.fold
         (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
@@ -205,7 +204,7 @@ let main =
     (Types.list
        (if Array.length Sys.argv > 1 then
           (List.map
-             (fun x -> TT.String x)
+             (fun x -> T.String x)
              (List.tl (List.tl (Array.to_list Sys.argv))))
         else
           []))

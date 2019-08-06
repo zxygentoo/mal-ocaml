@@ -1,6 +1,5 @@
 module E = Env
 module T = Types
-module TT = Types.Types
 
 
 exception Err of string
@@ -12,37 +11,37 @@ let read str =
 
 let rec eval env ast' =
   match macroexpand env ast' with
-  | TT.List([], _) as ast ->
+  | T.List([], _) as ast ->
     ast
 
-  | TT.List(TT.Symbol("def!", _) :: expr, _) ->
+  | T.List(T.Symbol("def!", _) :: expr, _) ->
     eval_def env expr
 
-  | TT.List(TT.Symbol("defmacro!", _) :: expr, _) ->
+  | T.List(T.Symbol("defmacro!", _) :: expr, _) ->
     eval_defmacro env expr
 
-  | TT.List(TT.Symbol("let*", _) :: expr, _) ->
+  | T.List(T.Symbol("let*", _) :: expr, _) ->
     eval_let env expr
 
-  | TT.List(TT.Symbol("do", _) :: expr, _) ->
+  | T.List(T.Symbol("do", _) :: expr, _) ->
     eval_do env expr
 
-  | TT.List(TT.Symbol("if", _) :: expr, _) ->
+  | T.List(T.Symbol("if", _) :: expr, _) ->
     eval_if env expr
 
-  | TT.List(TT.Symbol("fn*", _) :: expr, _) ->
+  | T.List(T.Symbol("fn*", _) :: expr, _) ->
     eval_fn env expr
 
-  | TT.List(TT.Symbol("quote", _) :: ast, _) ->
+  | T.List(T.Symbol("quote", _) :: ast, _) ->
     eval_quote ast
 
-  | TT.List(TT.Symbol("quasiquote", _) :: ast, _) ->
+  | T.List(T.Symbol("quasiquote", _) :: ast, _) ->
     eval_quasiquote env ast
 
-  | TT.List(TT.Symbol("macroexpand", _) :: ast, _) ->
+  | T.List(T.Symbol("macroexpand", _) :: ast, _) ->
     eval_macroexpand env ast
 
-  | TT.List(_, _) as ast ->
+  | T.List(_, _) as ast ->
     apply_fn env ast
 
   | _ as ast ->
@@ -50,7 +49,7 @@ let rec eval env ast' =
 
 and macroexpand env =
   function
-  | TT.List(TT.Symbol(x, _) :: args, _) as ast ->
+  | T.List(T.Symbol(x, _) :: args, _) as ast ->
     begin match E.get x env with
       | Some(Fn(f, _) as fn) when T.is_macro fn ->
         macroexpand env (f args)
@@ -64,7 +63,7 @@ and macroexpand env =
 
 and eval_def env =
   function
-  | [ TT.Symbol(sym, _) ; expr ] ->
+  | [ T.Symbol(sym, _) ; expr ] ->
     let value = eval env expr in
     E.set sym value env ;
     value
@@ -74,9 +73,9 @@ and eval_def env =
 
 and eval_defmacro env =
   function
-  | [ TT.Symbol(sym, _) ; expr ] ->
+  | [ T.Symbol(sym, _) ; expr ] ->
     begin match eval env expr with
-      | TT.Fn _ as fn ->
+      | T.Fn _ as fn ->
         let macro = T.set_macro fn in
         E.set sym macro env ;
         macro
@@ -90,9 +89,9 @@ and eval_defmacro env =
 
 and eval_let env =
   function
-  | [ TT.List(bindings, _) ; body ]
+  | [ T.List(bindings, _) ; body ]
 
-  | [ TT.Vector(bindings, _) ; body ] ->
+  | [ T.Vector(bindings, _) ; body ] ->
     eval
       (make_let_env (E.make (Some env)) bindings)
       body
@@ -102,7 +101,7 @@ and eval_let env =
 
 and make_let_env let_env =
   function
-  | TT.Symbol(k, _) :: v :: bindings_left ->
+  | T.Symbol(k, _) :: v :: bindings_left ->
     E.set k (eval let_env v) let_env ;
     make_let_env let_env bindings_left
 
@@ -137,9 +136,9 @@ and eval_if env =
 
 and eval_fn env =
   function
-  | [TT.List(arg_syms, _) ; body]
+  | [T.List(arg_syms, _) ; body]
 
-  | [TT.Vector(arg_syms, _) ; body] ->
+  | [T.Vector(arg_syms, _) ; body] ->
     T.fn(
       fun args ->
         eval
@@ -151,11 +150,11 @@ and eval_fn env =
 
 and make_fn_env fn_env arg_syms args =
   match (arg_syms, args) with
-  | [ TT.Symbol("&", _) ; TT.Symbol(k, _) ], vs ->
+  | [ T.Symbol("&", _) ; T.Symbol(k, _) ], vs ->
     E.set k (T.list vs) fn_env ;
     fn_env
 
-  | TT.Symbol(k, _) :: syms, v :: vs ->
+  | T.Symbol(k, _) :: syms, v :: vs ->
     E.set k v fn_env ;
     make_fn_env fn_env syms vs
 
@@ -183,19 +182,19 @@ and eval_quasiquote env =
 
 and quasiquote =
   function
-  | TT.List([ TT.Symbol("unquote", _) ; ast ], _)
+  | T.List([ T.Symbol("unquote", _) ; ast ], _)
 
-  | TT.Vector([ TT.Symbol("unquote", _) ; ast ], _) ->
+  | T.Vector([ T.Symbol("unquote", _) ; ast ], _) ->
     ast
 
-  | TT.List(TT.List([ TT.Symbol("splice-unquote", _) ; x ], _) :: xs, _)
+  | T.List(T.List([ T.Symbol("splice-unquote", _) ; x ], _) :: xs, _)
 
-  | TT.Vector(TT.List([ TT.Symbol("splice-unquote", _) ; x ], _) :: xs, _) ->
+  | T.Vector(T.List([ T.Symbol("splice-unquote", _) ; x ], _) :: xs, _) ->
     T.list [T.symbol "concat" ; x ; quasiquote (T.list xs)]
 
-  | TT.List(x :: xs, _)
+  | T.List(x :: xs, _)
 
-  | TT.Vector(x :: xs, _) ->
+  | T.Vector(x :: xs, _) ->
     T.list [T.symbol "cons" ; quasiquote x ; quasiquote (T.list xs)]
 
   | _ as ast ->
@@ -211,7 +210,7 @@ and eval_macroexpand env =
 
 and apply_fn env ast =
   match eval_ast env ast with
-  | TT.List(TT.Fn(f, _) :: args, _) ->
+  | T.List(T.Fn(f, _) :: args, _) ->
     f args
 
   | _ ->
@@ -219,7 +218,7 @@ and apply_fn env ast =
 
 and eval_ast env =
   function
-  | TT.Symbol(x, _) ->
+  | T.Symbol(x, _) ->
     begin match E.get x env with
       | Some(v) ->
         v
@@ -228,13 +227,13 @@ and eval_ast env =
         raise (Err ("Symbol '" ^ x ^ "' not found."))
     end
 
-  | TT.List(xs, _) ->
+  | T.List(xs, _) ->
     T.list(List.map (eval env) xs)
 
-  | TT.Vector(xs, _) ->
+  | T.Vector(xs, _) ->
     T.vector(List.map (eval env) xs)
 
-  | TT.Map(xs, _) ->
+  | T.Map(xs, _) ->
     T.map(
       T.MalMap.fold
         (fun k v m -> T.MalMap.add (eval env k) (eval env v) m)
@@ -283,7 +282,7 @@ let main =
     (Types.list
        (if Array.length Sys.argv > 1 then
           (List.map
-             (fun x -> TT.String x)
+             (fun x -> T.String x)
              (List.tl (List.tl (Array.to_list Sys.argv))))
         else
           []))

@@ -1,5 +1,4 @@
 module T = Types
-module TT = Types.Types
 module E = Env
 
 
@@ -8,13 +7,13 @@ exception Err of string
 
 let arith_fn f =
   function
-  | [ TT.Int a ; TT.Int b ] -> TT.Int(f a b)
+  | [ T.Int a ; T.Int b ] -> T.Int(f a b)
   | _ -> raise (Err "Arithmetic functions takes two int arguments.")
 
 
 let comp_fn f =
   function
-  | [ TT.Int a ; TT.Int b ] -> TT.Bool(f a b)
+  | [ T.Int a ; T.Int b ] -> T.Bool(f a b)
   | _ -> raise (Err "Arithmetic comparisons takes two int arguments.")
 
 
@@ -40,7 +39,7 @@ let println v =
 
 let read_string =
   function
-  | [ TT.String s ] -> Reader.read_str s
+  | [ T.String s ] -> Reader.read_str s
   | _ -> raise (Err "'read-string' only takes one argument of string.")
 
 
@@ -54,13 +53,13 @@ let slurp_caml filename =
 
 let slurp =
   function
-  | [ TT.String s ] -> T.string(slurp_caml s)
+  | [ T.String s ] -> T.string(slurp_caml s)
   | _ -> raise (Err "'slurp' only takes one argument of string.")
 
 
 let readline =
   function
-  | [TT.String x] ->
+  | [T.String x] ->
     print_string x;
     T.string (read_line ())
 
@@ -70,98 +69,98 @@ let readline =
 
 let nil_q =
   function
-  | [TT.Nil] -> T.maltrue
+  | [T.Nil] -> T.maltrue
   | _ -> T.malfalse
 
 
 let true_q =
   function
-  | [TT.Bool true] -> T.maltrue
+  | [T.Bool true] -> T.maltrue
   | _ -> T.malfalse
 
 
 let false_q =
   function
-  | [TT.Bool false] -> T.maltrue
+  | [T.Bool false] -> T.maltrue
   | _ -> T.malfalse
 
 
 let number_q =
   function
-  | [TT.Int _ ] -> T.maltrue
+  | [T.Int _ ] -> T.maltrue
   | _ -> T.malfalse
 
 
 let string_q =
   function
-  | [TT.String _] -> T.maltrue
+  | [T.String _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let keyword_q =
   function
-  | [TT.Keyword _] -> T.maltrue
+  | [T.Keyword _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let symbol_q =
   function
-  | [TT.Symbol _] -> T.maltrue
+  | [T.Symbol _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let list_q =
   function
-  | [ TT.List _ ] -> T.maltrue
+  | [ T.List _ ] -> T.maltrue
   | _ -> T.malfalse
 
 
 let vector_q =
   function
-  | [TT.Vector _] -> T.maltrue
+  | [T.Vector _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let sequential_q =
   function
-  | [TT.List _]
-  | [TT.Vector _] -> T.maltrue
+  | [T.List _]
+  | [T.Vector _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let map_q =
   function
-  | [TT.Map _] -> T.maltrue
+  | [T.Map _] -> T.maltrue
   | _ -> T.malfalse
 
 
 let fn_q =
   function
-  | [ TT.Fn _ as fn ] -> TT.Bool (not (T.is_macro fn))
+  | [ T.Fn _ as fn ] -> T.Bool (not (T.is_macro fn))
   | _ -> T.malfalse
 
 
 let macro_q =
   function
-  | [x] -> TT.Bool (T.is_macro x)
+  | [x] -> T.Bool (T.is_macro x)
   | _ -> raise (Err "'macro?' only takes one argument.")
 
 
 let atom_q =
   function
-  | [ TT.Atom _ ] -> T.maltrue
+  | [ T.Atom _ ] -> T.maltrue
   | _ -> T.malfalse
 
 
 let keyword =
   function
-  | [TT.String s] -> T.keyword s
+  | [T.String s] -> T.keyword s
   | _ -> raise (Err "'keyword' only takes one argument of string.")
 
 
 let symbol =
   function
-  | [TT.String s] -> T.symbol s
+  | [T.String s] -> T.symbol s
   | _ -> raise (Err "'symbol' only takes one argument of string.")
 
 
@@ -173,7 +172,7 @@ let atom =
 
 let eq =
   function
-  | [ a ; b ] -> TT.Bool (T.mal_equal a b)
+  | [ a ; b ] -> T.Bool (T.mal_equal a b)
   | _ -> T.malfalse
 
 
@@ -191,19 +190,19 @@ let with_meta =
 
 let deref =
   function
-  | [ TT.Atom(x) ] -> !x
+  | [ T.Atom(x) ] -> !x
   | _ -> raise (Err "'deref' only takes one argument of atom.")
 
 
 let reset_b =
   function
-  | [ TT.Atom(x) ; v ] -> x := v ; v
+  | [ T.Atom(x) ; v ] -> x := v ; v
   | _ -> raise (Err "'reset!' takes an atom and a value as arguments.")
 
 
 let swap_b =
   function
-  | TT.Atom x :: TT.Fn(f, _) :: args ->
+  | T.Atom x :: T.Fn(f, _) :: args ->
     let v = f (!x :: args) in
     x := v ;
     v
@@ -214,8 +213,8 @@ let swap_b =
 
 let empty_q =
   function
-  | [ TT.List([], _) ]
-  | [ TT.Vector([], _) ] ->
+  | [ T.List([], _) ]
+  | [ T.Vector([], _) ] ->
     T.maltrue
 
   | _ ->
@@ -224,11 +223,11 @@ let empty_q =
 
 let first =
   function
-  | [TT.Nil] ->
+  | [T.Nil] ->
     T.nil
 
-  | [TT.List(xs, _)]
-  | [TT.Vector(xs, _)] ->
+  | [T.List(xs, _)]
+  | [T.Vector(xs, _)] ->
     begin try
         List.hd xs
       with Failure _ ->
@@ -241,11 +240,11 @@ let first =
 
 let rest =
   function
-  | [TT.Nil] ->
+  | [T.Nil] ->
     T.empty_list
 
-  | [TT.List(xs, _)]
-  | [TT.Vector(xs, _)] ->
+  | [T.List(xs, _)]
+  | [T.Vector(xs, _)] ->
     begin try
         T.list (List.tl xs)
       with Failure _ ->
@@ -258,14 +257,14 @@ let rest =
 
 let count =
   function
-  | [ TT.List(v, _) ] | [ TT.Vector(v, _) ] -> T.int (List.length v)
+  | [ T.List(v, _) ] | [ T.Vector(v, _) ] -> T.int (List.length v)
   | _ -> T.int 0
 
 
 let nth =
   function
-  | [ TT.List(xs, _) ; TT.Int i ]
-  | [ TT.Vector(xs, _) ; TT.Int i ] ->
+  | [ T.List(xs, _) ; T.Int i ]
+  | [ T.Vector(xs, _) ; T.Int i ] ->
     begin match List.nth_opt xs i with
       | Some v -> v
       | None -> raise (Err "Index out of range.")
@@ -277,21 +276,24 @@ let nth =
 
 let seq =
   function
-  | [TT.Nil]
-  | [TT.String ""]
-  | [TT.List([], _)]
-  | [TT.Vector([], _)] ->
+  | [T.Nil]
+  | [T.String ""]
+  | [T.List([], _)]
+  | [T.Vector([], _)] ->
     T.nil
 
-  | [TT.String s] ->
+  | [T.String s] ->
     T.list
-      (s
-       |> String.to_seq
-       |> List.of_seq
-       |> List.map (fun v -> T.string (String.make 1 v)))
+      (*       (s
+               |> String.to_seq
+               |> List.of_seq
+               |> List.map (fun v -> T.string (String.make 1 v))) *)
+      (List.init
+         (String.length s)
+         (fun i -> T.string (String.make 1 (String.get s i))))
 
-  | [ TT.List _ as xs ]
-  | [ TT.Vector _ as xs ] ->
+  | [ T.List _ as xs ]
+  | [ T.Vector _ as xs ] ->
     T.list (T.list_of_container xs)
 
   | _ ->
@@ -300,8 +302,8 @@ let seq =
 
 let cons =
   function
-  | [ x ; TT.List(xs, _) ]
-  | [ x ; TT.Vector(xs, _) ] ->
+  | [ x ; T.List(xs, _) ]
+  | [ x ; T.Vector(xs, _) ] ->
     T.list (x :: xs)
 
   | _ ->
@@ -311,8 +313,8 @@ let cons =
 let rec concat = 
   function
   | []
-  | [TT.List([], _)]
-  | [TT.Vector([], _)] ->
+  | [T.List([], _)]
+  | [T.Vector([], _)] ->
     T.empty_list
 
   | [x] as v when T.is_container x ->
@@ -331,14 +333,14 @@ let rec conj =
   | c :: x :: (_ :: _ as xs) ->
     conj ((conj [c; x]) :: xs)
 
-  | [ TT.List(v, meta) ; x ] ->
-    TT.List(x :: v, meta)
+  | [ T.List(v, meta) ; x ] ->
+    T.List(x :: v, meta)
 
-  | [ TT.Vector(v, meta) ; x ] ->
-    TT.Vector(v @ [x], meta)
+  | [ T.Vector(v, meta) ; x ] ->
+    T.Vector(v @ [x], meta)
 
-  | [ TT.Map(m, meta) ; TT.Vector([k ; v], _) ] ->
-    TT.Map(T.MalMap.add k v m, meta)
+  | [ T.Map(m, meta) ; T.Vector([k ; v], _) ] ->
+    T.Map(T.MalMap.add k v m, meta)
 
   | _ ->
     raise (Err "'conj' takes list/vector/map as first argument.")
@@ -346,16 +348,16 @@ let rec conj =
 
 let contains_q =
   function
-  | [ TT.Map(m, _) ; k ] -> TT.Bool (T.MalMap.mem k m)
+  | [ T.Map(m, _) ; k ] -> T.Bool (T.MalMap.mem k m)
   | _ -> raise (Err "'contains?' takes a map and a value as arguments.")
 
 
 let get =
   function
-  | [ TT.Nil ; _ ] ->
+  | [ T.Nil ; _ ] ->
     T.nil
 
-  | [ TT.Map(m, _) ; k ] ->
+  | [ T.Map(m, _) ; k ] ->
     begin match T.MalMap.find_opt k m with
       | Some v -> v
       | None -> T.nil
@@ -367,13 +369,13 @@ let get =
 
 let keys =
   function
-  | [TT.Map(m, _)] -> T.list(T.MalMap.fold (fun k _ ks -> k :: ks) m [])
+  | [T.Map(m, _)] -> T.list(T.MalMap.fold (fun k _ ks -> k :: ks) m [])
   | _ -> raise (Err "'keys' only takes one argument of map.")
 
 
 let vals =
   function
-  | [TT.Map(m, _)] -> T.list(T.MalMap.fold (fun _ v vs -> v :: vs) m [])
+  | [T.Map(m, _)] -> T.list(T.MalMap.fold (fun _ v vs -> v :: vs) m [])
   | _ -> raise (Err "'vals' only takes one argument of map.")
 
 
@@ -382,11 +384,11 @@ let rec assoc =
   | c :: k :: v :: (_ :: _ as xs) ->
     assoc ((assoc [c; k; v]) :: xs)
 
-  | [TT.Nil ; k ; v] ->
+  | [T.Nil ; k ; v] ->
     T.map(Types.MalMap.add k v Types.MalMap.empty)
 
-  | [TT.Map(m, meta) ; k ; v] ->
-    TT.Map(Types.MalMap.add k v m, meta)
+  | [T.Map(m, meta) ; k ; v] ->
+    T.Map(Types.MalMap.add k v m, meta)
 
   | _ ->
     T.nil
@@ -397,8 +399,8 @@ let rec dissoc =
   | c :: x :: (_ :: _ as xs) ->
     dissoc ((dissoc [c; x]) :: xs)
 
-  | [ TT.Map(m, meta) ; k ] ->
-    TT.Map(T.MalMap.remove k m, meta)
+  | [ T.Map(m, meta) ; k ] ->
+    T.Map(T.MalMap.remove k m, meta)
 
   | _ ->
     T.nil
@@ -406,7 +408,7 @@ let rec dissoc =
 
 let map =
   function
-  | [ TT.Fn(f, _) ; xs ] ->
+  | [ T.Fn(f, _) ; xs ] ->
     T.list (List.map (fun x -> f [x]) (T.list_of_container xs))
 
   | _ ->
@@ -415,7 +417,7 @@ let map =
 
 let apply =
   function
-  | TT.Fn(f, _) :: apply_args ->
+  | T.Fn(f, _) :: apply_args ->
     begin match List.rev apply_args with
       | last_arg :: rev_args ->
         f ((List.rev rev_args) @ (T.list_of_container last_arg))
@@ -434,7 +436,7 @@ let throw =
 
 let time_ms =
   function
-  | [] -> TT.Int (truncate (1000.0 *. Unix.gettimeofday ()))
+  | [] -> T.Int (truncate (1000.0 *. Unix.gettimeofday ()))
   | _ -> raise (Err "'time-ms' takes no arguments.")
 
 
