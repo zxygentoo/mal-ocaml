@@ -284,10 +284,6 @@ let seq =
 
   | [T.String s] ->
     T.list
-      (*       (s
-               |> String.to_seq
-               |> List.of_seq
-               |> List.map (fun v -> T.string (String.make 1 v))) *)
       (List.init
          (String.length s)
          (fun i -> T.string (String.make 1 (String.get s i))))
