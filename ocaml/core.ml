@@ -284,9 +284,7 @@ let seq =
 
   | [T.String s] ->
     T.list
-      (List.init
-         (String.length s)
-         (fun i -> T.string (String.make 1 (String.get s i))))
+      (List.init (String.length s) (fun i -> T.string (String.make 1 s.[i])))
 
   | [ T.List _ as xs ]
   | [ T.Vector _ as xs ] ->
