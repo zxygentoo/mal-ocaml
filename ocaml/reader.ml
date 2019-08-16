@@ -101,21 +101,21 @@ let rec read_form =
     (read_salar x, xs)
 
 and read_list tokens =
-  let forms, tokens_left = read_container ")" [] tokens in
+  let forms, tokens_left = read_collection ")" [] tokens in
   (T.list forms, tokens_left)
 
 and read_vector tokens =
-  let forms, tokens_left = read_container "]" [] tokens in
+  let forms, tokens_left = read_collection "]" [] tokens in
   (T.vector forms, tokens_left)
 
 and read_map tokens =
-  let forms, tokens_left = read_container "}" [] tokens in
+  let forms, tokens_left = read_collection "}" [] tokens in
   try
     (T.map_of_list forms, tokens_left)
   with T.Err msg ->
     raise (Err msg)
 
-and read_container eol forms tokens =
+and read_collection eol forms tokens =
   match tokens with
   | [] ->
     raise (Err "Can't read unbalanced form.")
@@ -124,11 +124,11 @@ and read_container eol forms tokens =
     (forms, xs)
 
   | x :: xs when is_comment x ->
-    read_container eol forms xs
+    read_collection eol forms xs
 
   | _ ->
     let form, tokens_left = read_form tokens in
-    read_container eol (forms @ [form]) tokens_left
+    read_collection eol (forms @ [form]) tokens_left
 
 and read_quote sym tokens =
   let form, tokens_left = read_form tokens in

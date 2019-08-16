@@ -79,15 +79,15 @@ let to_bool =
   | _ -> true
 
 
-(* container type (list/vector/map) helpers *)
+(* collection type (list/vector/map) helpers *)
 
-let is_container =
+let is_collection =
   function
   | Types.List _ | Types.Vector _ | Types.Map _ -> true
   | _ -> false
 
 
-let list_of_container =
+let list_of_collection =
   function
   | Types.List(xs, _) | Types.Vector(xs, _) ->
     xs
@@ -96,12 +96,12 @@ let list_of_container =
     MalMap.fold (fun k v m -> vector [ k ; v ] :: m) xs [] |> List.rev
 
   | _ ->
-    raise (Err "Not a container type.")
+    raise (Err "Not a collection type.")
 
 
-let concat_containers a b =
-  if is_container a && is_container b then
-    list((list_of_container a) @ (list_of_container b))
+let concat_collections a b =
+  if is_collection a && is_collection b then
+    list((list_of_collection a) @ (list_of_collection b))
   else
     raise (Err "Can only concat two conatiner types.")
 

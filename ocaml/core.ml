@@ -288,7 +288,7 @@ let seq =
 
   | [ T.List _ as xs ]
   | [ T.Vector _ as xs ] ->
-    T.list (T.list_of_container xs)
+    T.list (T.list_of_collection xs)
 
   | _ ->
     raise (Err "'seq' only takes one argument of list/vector/string/nil.")
@@ -311,11 +311,11 @@ let rec concat =
   | [T.Vector([], _)] ->
     T.empty_list
 
-  | [x] as v when T.is_container x ->
+  | [x] as v when T.is_collection x ->
     seq v
 
-  | a :: b :: rest when T.is_container a && T.is_container b ->
-    concat (T.concat_containers a b :: rest)
+  | a :: b :: rest when T.is_collection a && T.is_collection b ->
+    concat (T.concat_collections a b :: rest)
 
   | _ ->
     raise
@@ -403,7 +403,7 @@ let rec dissoc =
 let map =
   function
   | [ T.Fn(f, _) ; xs ] ->
-    T.list (List.map (fun x -> f [x]) (T.list_of_container xs))
+    T.list (List.map (fun x -> f [x]) (T.list_of_collection xs))
 
   | _ ->
     raise (Err "'map' takes a function as first argument.")
@@ -414,7 +414,7 @@ let apply =
   | T.Fn(f, _) :: apply_args ->
     begin match List.rev apply_args with
       | last_arg :: rev_args ->
-        f ((List.rev rev_args) @ (T.list_of_container last_arg))
+        f ((List.rev rev_args) @ (T.list_of_collection last_arg))
       | [] -> f []
     end
 
