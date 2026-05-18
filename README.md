@@ -8,8 +8,8 @@ My implementation of [Mal](https://github.com/kanaka/mal) (Make-A-Lisp) in [OCam
 
 ### Dependencies
 
-- ocaml compiler *(tested on 4.07.0)*
-- [dune](https://dune.build/): for building executables *(tested on 1.10.0)*
+- ocaml compiler *(tested on 5.4.1)*
+- [dune](https://dune.build/): for building executables *(tested on 3.22.0)*
 - make
 - rlwrap: for better repl experience
 - python *(optional)*: run mal project test suite
