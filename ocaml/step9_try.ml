@@ -118,7 +118,16 @@ and make_let_env let_env =
     let_env
 
 and eval_do env =
-  List.fold_left (fun _ expr -> eval env expr) T.nil
+  function
+  | [] ->
+    T.nil
+
+  | expr :: [] ->
+    eval env expr
+
+  | expr :: rest ->
+    eval env expr |> ignore ;
+    eval_do env rest
 
 and eval_if env =
   function
